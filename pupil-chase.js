@@ -19,13 +19,13 @@
   `;
   document.head.appendChild(style);
 
-  // These eyes are generated from stable page sections, not from occurrences of the word 視点.
+  // Dedicated chase eyes: independent of the word 視点.
   const targetSpecs=[
     {sel:'.essay',x:.88,y:.16,rot:'7deg'},
-    {sel:'.book:nth-child(1)',x:.12,y:.42,rot:'-8deg'},
-    {sel:'.book:nth-child(3)',x:.88,y:.48,rot:'6deg'},
-    {sel:'.book:nth-child(5)',x:.13,y:.64,rot:'-5deg'},
-    {sel:'.views',x:.84,y:.18,rot:'8deg'}
+    {sel:'.book:nth-child(1)',x:.12,y:.34,rot:'-8deg'},
+    {sel:'.book:nth-child(3)',x:.88,y:.34,rot:'6deg'},
+    {sel:'.book:nth-child(5)',x:.13,y:.34,rot:'-5deg'},
+    {sel:'.views',x:.84,y:.62,rot:'8deg'}
   ];
   let eyes=[];
   function buildEyes(){
@@ -57,7 +57,12 @@
   }
   function start(e){
     if(running)return;e.preventDefault();e.stopImmediatePropagation();
-    running=true;step=0;document.body.classList.add('secret-mode','pupil-chase');toggle.setAttribute('aria-pressed','true');buildEyes();
+    running=true;step=0;
+    // Do not enable the old secret-mode: it replaces the word 視点 with eyes and covers copy.
+    document.body.classList.remove('secret-mode');
+    document.body.classList.add('pupil-chase');
+    toggle.setAttribute('aria-pressed','false');
+    buildEyes();
     const iris=toggle.querySelector('.secret-iris'),p=center(iris);
     dot=document.createElement('button');dot.type='button';dot.className='pupil-runner';dot.setAttribute('aria-label','逃げた黒目をつかまえる');dot.style.left=p.x+'px';dot.style.top=p.y+'px';document.body.appendChild(dot);dot.addEventListener('click',catchDot);
     requestAnimationFrame(()=>{dot.classList.add('on');say('黒目が逃げた！ 目の中を探して！');setTimeout(moveToEye,240)})
