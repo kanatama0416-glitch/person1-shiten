@@ -15,6 +15,9 @@
   .pupil-runner{position:absolute;width:11px;height:11px;border:0;padding:0;border-radius:50%;background:#111;z-index:10050;transform:translate(-50%,-50%) scale(0);transition:left .48s cubic-bezier(.18,.9,.3,1.12),top .48s cubic-bezier(.18,.9,.3,1.12),transform .2s ease;cursor:pointer;touch-action:manipulation;box-shadow:none}
   .pupil-runner.on{transform:translate(-50%,-50%) scale(1)}.pupil-runner:active{transform:translate(-50%,-50%) scale(.72)}
   body.pupil-chase .secret-iris:after{opacity:0}
+  /* Keep the original secret-eye play, but never replace copy containing 視点 with an inline eye. */
+  body.pupil-chase.secret-mode .view-swap .view-word{display:inline!important}
+  body.pupil-chase.secret-mode .view-swap .view-eye-inline{display:none!important;animation:none!important}
   .pupil-msg{position:fixed;z-index:10060;left:50%;bottom:72px;transform:translateX(-50%) translateY(8px);background:#fff;border:3px solid #111;box-shadow:4px 4px 0 var(--p);padding:7px 12px;font:900 11px/1.2 system-ui,sans-serif;opacity:0;pointer-events:none;transition:.2s;white-space:nowrap}.pupil-msg.show{opacity:1;transform:translateX(-50%) translateY(0)}
   `;
   document.head.appendChild(style);
@@ -53,15 +56,14 @@
   function catchDot(e){e.preventDefault();e.stopPropagation();clearCurrent();step++;if(step<eyes.length){say(step===1?'次の目へ！':step===3?'まだ逃げる！':'こっちこっち！');moveToEye()}else finish()}
   function finish(){
     clearCurrent();const iris=toggle.querySelector('.secret-iris');const p=center(iris);dot.style.position='fixed';dot.style.left=(p.x-scrollX)+'px';dot.style.top=(p.y-scrollY)+'px';say('ただいま。');
-    setTimeout(()=>{dot.classList.remove('on');document.body.classList.remove('pupil-chase');setTimeout(()=>{dot.remove();dot=null;eyes.forEach(e=>e.remove());eyes=[];running=false;step=0},260)},520)
+    setTimeout(()=>{dot.classList.remove('on');document.body.classList.remove('pupil-chase','secret-mode');toggle.setAttribute('aria-pressed','false');setTimeout(()=>{dot.remove();dot=null;eyes.forEach(e=>e.remove());eyes=[];running=false;step=0},260)},520)
   }
   function start(e){
     if(running)return;e.preventDefault();e.stopImmediatePropagation();
     running=true;step=0;
-    // Do not enable the old secret-mode: it replaces the word 視点 with eyes and covers copy.
-    document.body.classList.remove('secret-mode');
-    document.body.classList.add('pupil-chase');
-    toggle.setAttribute('aria-pressed','false');
+    // Restore the original hidden-eye gimmicks while keeping inline copy untouched.
+    document.body.classList.add('secret-mode','pupil-chase');
+    toggle.setAttribute('aria-pressed','true');
     buildEyes();
     const iris=toggle.querySelector('.secret-iris'),p=center(iris);
     dot=document.createElement('button');dot.type='button';dot.className='pupil-runner';dot.setAttribute('aria-label','逃げた黒目をつかまえる');dot.style.left=p.x+'px';dot.style.top=p.y+'px';document.body.appendChild(dot);dot.addEventListener('click',catchDot);
