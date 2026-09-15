@@ -28,7 +28,7 @@
     {sel:'.book:nth-child(1)',x:.12,y:.34,rot:'-8deg'},
     {sel:'.book:nth-child(3)',x:.88,y:.34,rot:'6deg'},
     {sel:'.book:nth-child(5)',x:.13,y:.34,rot:'-5deg'},
-    {sel:'.views',x:.84,y:.62,rot:'8deg'}
+    {sel:'.views',x:.84,y:.18,rot:'8deg'}
   ];
   let eyes=[];
   function buildEyes(){
