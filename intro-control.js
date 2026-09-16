@@ -3,7 +3,7 @@
   var intro=document.getElementById('intro');
   if(!intro||!document.body.classList.contains('intro-lock'))return;
 
-  var key='shiten-intro-last-seen-v2';
+  var key='shiten-intro-last-seen-v3';
   var now=Date.now();
   var seenRecently=false;
   try{
