@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/final-smoke-check.yml'
+      - '.github/workflows/pages.yml'
       - 'index.html'
       - 'base.html'
       - 'core.html'
@@ -29,7 +30,7 @@ jobs:
           from selenium.webdriver.common.by import By
           from selenium.webdriver.support.ui import WebDriverWait
 
-          url='https://kanatama0416-glitch.github.io/person1-shiten/?smoke=20260916-01-only'
+          url='https://kanatama0416-glitch.github.io/person1-shiten/?smoke=20260916-static-01'
           o=webdriver.ChromeOptions()
           for a in ['--headless=new','--no-sandbox','--disable-dev-shm-usage','--window-size=412,915']:
             o.add_argument(a)
@@ -45,11 +46,15 @@ jobs:
           b=d.find_element(By.ID,'secretToggle')
           b.click();time.sleep(.4)
           assert d.execute_script("return document.body.classList.contains('secret-mode')")
+          assert d.execute_script("return document.body.classList.contains('pupil-chase')")
           b.click();time.sleep(.4)
           assert not d.execute_script("return document.body.classList.contains('secret-mode')"), d.find_element(By.TAG_NAME,'body').get_attribute('class')
           assert not d.execute_script("return document.body.classList.contains('pupil-chase')"), d.find_element(By.TAG_NAME,'body').get_attribute('class')
           assert len(d.find_elements(By.CSS_SELECTOR,'.pupil-runner,.escape-eye'))==0
-          print(json.dumps({'01':'load ok + toggle on/off ok','browser_logs':d.get_log('browser')},ensure_ascii=False,indent=2))
+          logs=d.get_log('browser')
+          severe=[x for x in logs if x.get('level')=='SEVERE']
+          assert not severe,severe
+          print(json.dumps({'01':'load ok + toggle on/off ok','browser_logs':logs},ensure_ascii=False,indent=2))
           d.quit()
           PY
           python /tmp/check.py
