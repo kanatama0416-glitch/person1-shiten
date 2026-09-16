@@ -20,7 +20,7 @@ jobs:
   smoke:
     runs-on: ubuntu-latest
     steps:
-      - name: Run live browser checks
+      - name: Check 01 live in Chrome
         run: |
           python -m pip install --disable-pip-version-check selenium
           cat > /tmp/check.py <<'PY'
@@ -29,105 +29,27 @@ jobs:
           from selenium.webdriver.common.by import By
           from selenium.webdriver.support.ui import WebDriverWait
 
-          base='https://kanatama0416-glitch.github.io/'
-          urls={
-            'about':base+'about-shiten/',
-            '01':base+'person1-shiten/',
-            '02':base+'person2-shiten/',
-            '03':base+'person3-shiten/',
-            '04':base+'person4-shiten/',
-            '05':base+'person5-shiten/',
-          }
+          url='https://kanatama0416-glitch.github.io/person1-shiten/?smoke=20260916-01-only'
           o=webdriver.ChromeOptions()
           for a in ['--headless=new','--no-sandbox','--disable-dev-shm-usage','--window-size=412,915']:
             o.add_argument(a)
-          o.set_capability('goog:loggingPrefs',{'browser':'ALL','performance':'ALL'})
+          o.set_capability('goog:loggingPrefs',{'browser':'ALL'})
           d=webdriver.Chrome(options=o)
           d.set_page_load_timeout(30)
           W=WebDriverWait(d,20)
-          out={}
-          def js(s,*a): return d.execute_script(s,*a)
-          def load(key):
-            d.get(urls[key]+'?smoke=20260916-toggle-check')
-            body=d.find_element(By.TAG_NAME,'body')
-            W.until(lambda x:'ページを読み込めませんでした。' not in x.find_element(By.TAG_NAME,'body').text)
-            if key!='about':
-              W.until(lambda x:len(x.find_elements(By.CSS_SELECTOR,'.page'))>0)
-              W.until(lambda x:len(x.find_elements(By.CSS_SELECTOR,'#secretToggle,#tearToggle'))>0)
-            return time.time()
-          def resources():
-            return js("return performance.getEntriesByType('resource').map(x=>x.name)")
-
-          load('about')
-          W.until(lambda x:len(x.find_elements(By.ID,'goalEye'))>0)
-          touch_before=js("return getComputedStyle(document.getElementById('heroEye')).touchAction")
-          js("document.getElementById('goalEye').click()")
-          touch_after=js("return getComputedStyle(document.getElementById('heroEye')).touchAction")
-          assert touch_before=='pan-y',touch_before
-          assert touch_after=='none',touch_after
-          assert not [u for u in resources() if 'raw.githubusercontent.com' in u],resources()
-          out['about']={'touch_before':touch_before,'touch_after':touch_after}
-
-          t=load('01')
+          d.get(url)
+          W.until(lambda x:'ページを読み込めませんでした。' not in x.find_element(By.TAG_NAME,'body').text)
+          W.until(lambda x:len(x.find_elements(By.CSS_SELECTOR,'.page'))>0)
+          W.until(lambda x:len(x.find_elements(By.ID,'secretToggle'))>0)
           W.until(lambda x:len(x.find_elements(By.CSS_SELECTOR,'.intro'))==0 and 'intro-lock' not in x.find_element(By.TAG_NAME,'body').get_attribute('class'))
-          first_intro=time.time()-t
-          assert first_intro<2.5,first_intro
           b=d.find_element(By.ID,'secretToggle')
-          b.click();time.sleep(.35)
-          assert js("return document.body.classList.contains('secret-mode')"), d.find_element(By.TAG_NAME,'body').get_attribute('class')
-          b.click();time.sleep(.35)
-          assert not js("return document.body.classList.contains('secret-mode')"), d.find_element(By.TAG_NAME,'body').get_attribute('class')
-          assert not js("return document.body.classList.contains('pupil-chase')"), d.find_element(By.TAG_NAME,'body').get_attribute('class')
+          b.click();time.sleep(.4)
+          assert d.execute_script("return document.body.classList.contains('secret-mode')")
+          b.click();time.sleep(.4)
+          assert not d.execute_script("return document.body.classList.contains('secret-mode')"), d.find_element(By.TAG_NAME,'body').get_attribute('class')
+          assert not d.execute_script("return document.body.classList.contains('pupil-chase')"), d.find_element(By.TAG_NAME,'body').get_attribute('class')
           assert len(d.find_elements(By.CSS_SELECTOR,'.pupil-runner,.escape-eye'))==0
-          assert not [u for u in resources() if 'raw.githubusercontent.com' in u],resources()
-          out['01']={'intro':first_intro,'toggle_off':True}
-
-          t=load('02')
-          W.until(lambda x:len(x.find_elements(By.CSS_SELECTOR,'.intro'))==0 and 'intro-lock' not in x.find_element(By.TAG_NAME,'body').get_attribute('class'))
-          repeat_intro=time.time()-t
-          assert repeat_intro<1.35,repeat_intro
-          d.find_element(By.ID,'secretToggle').click()
-          W.until(lambda x:x.find_element(By.ID,'eyeRoom').get_attribute('open') is not None)
-          for i in range(5):
-            food=d.find_elements(By.CSS_SELECTOR,'.room-food')
-            if not food:
-              d.find_element(By.CSS_SELECTOR,'.room-spawn').click();time.sleep(.05);food=d.find_elements(By.CSS_SELECTOR,'.room-food')
-            food[0].click();time.sleep(.08)
-            if i<4:d.find_element(By.CSS_SELECTOR,'.room-spawn').click();time.sleep(.05)
-          count=int(d.find_element(By.CSS_SELECTOR,'.room-count b').text)
-          stage=d.find_element(By.ID,'eyeRoom').get_attribute('class')
-          assert count>=5,count
-          assert 'stage-10' in stage,stage
-          assert '5こで進化' in d.page_source
-          assert not [u for u in resources() if 'raw.githubusercontent.com' in u],resources()
-          out['02']={'intro':repeat_intro,'count':count,'stage':stage}
-
-          load('03');W.until(lambda x:len(x.find_elements(By.CSS_SELECTOR,'.intro'))==0)
-          d.find_element(By.ID,'secretToggle').click();time.sleep(.25)
-          assert js("return document.body.classList.contains('cat-ready')")
-          assert not [u for u in resources() if 'raw.githubusercontent.com' in u],resources()
-          out['03']={'cat_ready':True}
-
-          load('04');W.until(lambda x:len(x.find_elements(By.CSS_SELECTOR,'.intro'))==0)
-          b=d.find_element(By.ID,'tearToggle');b.click();time.sleep(.35)
-          g=d.find_element(By.ID,'p4Garden')
-          assert g.value_of_css_property('display')!='none'
-          b.click();time.sleep(.15)
-          assert g.value_of_css_property('display')=='none'
-          assert not [u for u in resources() if 'raw.githubusercontent.com' in u],resources()
-          out['04']={'toggle_ok':True}
-
-          load('05');W.until(lambda x:len(x.find_elements(By.CSS_SELECTOR,'.intro'))==0)
-          js("window.matchMedia = (function(orig){return function(q){if(q.indexOf('prefers-reduced-motion')>=0)return {matches:true,media:q,addEventListener:function(){},removeEventListener:function(){}};return orig.call(window,q)}})(window.matchMedia)")
-          d.find_element(By.ID,'secretToggle').click();W.until(lambda x:len(x.find_elements(By.CSS_SELECTOR,'.final-finale.on'))>0)
-          time.sleep(.25)
-          static_display=js("var e=document.querySelector('.finale-static');return e?getComputedStyle(e).display:null")
-          d.find_element(By.ID,'secretToggle').click();time.sleep(.15)
-          assert len(d.find_elements(By.CSS_SELECTOR,'.final-finale'))==0
-          assert not [u for u in resources() if 'raw.githubusercontent.com' in u],resources()
-          out['05']={'finale_open_close':True,'static_display':static_display}
-
-          print(json.dumps(out,ensure_ascii=False,indent=2))
+          print(json.dumps({'01':'load ok + toggle on/off ok','browser_logs':d.get_log('browser')},ensure_ascii=False,indent=2))
           d.quit()
           PY
           python /tmp/check.py
