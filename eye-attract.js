@@ -15,6 +15,7 @@
 #secretToggle.shiten-attract-look .secret-iris,#tearToggle.shiten-attract-look .secret-iris,
 #secretToggle.shiten-attract-look .tear-iris,#tearToggle.shiten-attract-look .tear-iris,
 #secretToggle.shiten-attract-look [class*="iris"],#tearToggle.shiten-attract-look [class*="iris"]{transform:translate(-5px,-4px)!important}
+body.cat-ready #secretToggle.shiten-attract-look::after{transform:translate(calc(-50% - 5px),calc(-50% - 4px))!important}
 #secretToggle.shiten-attract-near,#tearToggle.shiten-attract-near{opacity:.82!important;transform:translate(-9px,-9px) rotate(-3deg) scale(1.08)!important;box-shadow:3px 3px 0 #111!important}
 .shiten-eye-hint{position:fixed;z-index:2147483000;right:72px;bottom:27px;pointer-events:none;background:#111;color:#fff;border:2px solid #111;border-radius:999px;padding:6px 9px;font:800 11px/1.15 -apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif;white-space:nowrap;box-shadow:3px 3px 0 rgba(255,255,255,.9);opacity:0;transform:translate(7px,2px) scale(.92);transition:opacity .18s ease,transform .18s ease}
 .shiten-eye-hint.shiten-eye-hint-show{opacity:1;transform:translate(0,0) scale(1)}
