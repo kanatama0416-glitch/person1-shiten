@@ -18,10 +18,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Prepare linked viewpoint pages
+      - name: Prepare linked viewpoint pages and shared scripts
         run: |
           mkdir -p public
           cp index.html public/index.html
+          cp ./*.js public/
           python3 - <<'PY'
           from pathlib import Path
           p = Path('public/index.html')
