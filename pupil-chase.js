@@ -30,6 +30,13 @@
     {sel:'.book:nth-child(5)',x:.13,y:.34,rot:'-5deg'},
     {sel:'.views',x:.84,y:.18,rot:'8deg'}
   ];
+  const chaseLines=[
+    'ちょっと散歩してくる。',
+    '目玉って窮屈なんだよね。',
+    '外の世界も見たい。',
+    'ずっと真ん中にいると思った？',
+    '中心って飽きるんだよね。'
+  ];
   let eyes=[];
   function buildEyes(){
     eyes.forEach(e=>e.remove());eyes=[];
@@ -45,7 +52,7 @@
   }
 
   let running=false,step=0,dot=null,msg=null,currentEye=null,runToken=0;
-  function say(text){if(!msg){msg=document.createElement('div');msg.className='pupil-msg';document.body.appendChild(msg)}msg.textContent=text;msg.classList.add('show');clearTimeout(say.t);say.t=setTimeout(()=>{if(msg)msg.classList.remove('show')},1050)}
+  function say(text){if(!msg){msg=document.createElement('div');msg.className='pupil-msg';document.body.appendChild(msg)}msg.textContent=text;msg.classList.add('show');clearTimeout(say.t);say.t=setTimeout(()=>{if(msg)msg.classList.remove('show')},1900)}
   function center(el){const r=el.getBoundingClientRect();return{x:r.left+scrollX+r.width/2,y:r.top+scrollY+r.height/2}}
   function clearCurrent(){if(currentEye){currentEye.classList.remove('runner-here');currentEye=null}}
   function cancel(){
@@ -65,12 +72,12 @@
     const token=runToken,eye=eyes[step];eye.scrollIntoView({behavior:'smooth',block:'center'});
     setTimeout(()=>{if(!running||token!==runToken||!dot||!eye.isConnected)return;clearCurrent();currentEye=eye;eye.classList.add('runner-here','eye-pop');setTimeout(()=>{if(eye.isConnected)eye.classList.remove('eye-pop')},450);const p=center(eye.querySelector('.escape-iris'));dot.style.left=p.x+'px';dot.style.top=p.y+'px'},280);
   }
-  function catchDot(e){e.preventDefault();e.stopPropagation();if(!running)return;clearCurrent();step++;if(step<eyes.length){say(step===1?'次の目へ！':step===3?'まだ逃げる！':'こっちこっち！');moveToEye()}else finish()}
+  function catchDot(e){e.preventDefault();e.stopPropagation();if(!running)return;clearCurrent();step++;if(step<eyes.length){say(chaseLines[step]||'黒目にも自由を。');moveToEye()}else finish()}
   function finish(){
     if(!running||!dot)return;
     const token=runToken;
-    clearCurrent();const iris=toggle.querySelector('.secret-iris');const p=center(iris);dot.style.position='fixed';dot.style.left=(p.x-scrollX)+'px';dot.style.top=(p.y-scrollY)+'px';say('ただいま。');
-    setTimeout(()=>{if(!running||token!==runToken||!dot)return;dot.classList.remove('on');document.body.classList.remove('pupil-chase','secret-mode');toggle.setAttribute('aria-pressed','false');setTimeout(()=>{if(token!==runToken)return;if(dot){dot.remove();dot=null}eyes.forEach(e=>e.remove());eyes=[];if(msg){msg.remove();msg=null}running=false;step=0},260)},520)
+    clearCurrent();const iris=toggle.querySelector('.secret-iris');const p=center(iris);dot.style.position='fixed';dot.style.left=(p.x-scrollX)+'px';dot.style.top=(p.y-scrollY)+'px';say('しょうがないな。戻ります。');
+    setTimeout(()=>{if(!running||token!==runToken||!dot)return;dot.classList.remove('on');document.body.classList.remove('pupil-chase','secret-mode');toggle.setAttribute('aria-pressed','false');setTimeout(()=>{if(token!==runToken)return;if(dot){dot.remove();dot=null}eyes.forEach(e=>e.remove());eyes=[];if(msg){msg.remove();msg=null}running=false;step=0},260)},1900)
   }
   function start(e){
     if(running){e.preventDefault();e.stopImmediatePropagation();cancel();return}
@@ -83,7 +90,7 @@
     buildEyes();
     const iris=toggle.querySelector('.secret-iris'),p=center(iris);
     dot=document.createElement('button');dot.type='button';dot.className='pupil-runner';dot.setAttribute('aria-label','逃げた黒目をつかまえる');dot.style.left=p.x+'px';dot.style.top=p.y+'px';document.body.appendChild(dot);dot.addEventListener('click',catchDot);
-    requestAnimationFrame(()=>{if(!running||token!==runToken||!dot)return;dot.classList.add('on');say('黒目が逃げた！ 目の中を探して！');setTimeout(()=>{if(running&&token===runToken)moveToEye()},240)})
+    requestAnimationFrame(()=>{if(!running||token!==runToken||!dot)return;dot.classList.add('on');say(chaseLines[0]);setTimeout(()=>{if(running&&token===runToken)moveToEye()},240)})
   }
   toggle.addEventListener('click',start,true);
 })();
