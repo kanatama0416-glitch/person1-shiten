@@ -31,11 +31,11 @@
     {sel:'.views',x:.84,y:.18,rot:'8deg'}
   ];
   const chaseLines=[
-    'ちょっと散歩してくる。',
+    'ちょっと家出してくる。',
     '目玉って窮屈なんだよね。',
-    '外の世界も見たい。',
-    'ずっと真ん中にいると思った？',
-    '中心って飽きるんだよね。'
+    '外の世界、見てみたかったんだ。',
+    'あっちの目も悪くないな。',
+    'でも、なんか落ち着かない。'
   ];
   let eyes=[];
   function buildEyes(){
@@ -76,7 +76,7 @@
   function finish(){
     if(!running||!dot)return;
     const token=runToken;
-    clearCurrent();const iris=toggle.querySelector('.secret-iris');const p=center(iris);dot.style.position='fixed';dot.style.left=(p.x-scrollX)+'px';dot.style.top=(p.y-scrollY)+'px';say('しょうがないな。戻ります。');
+    clearCurrent();const iris=toggle.querySelector('.secret-iris');const p=center(iris);dot.style.position='fixed';dot.style.left=(p.x-scrollX)+'px';dot.style.top=(p.y-scrollY)+'px';say('やっぱ、ここがいいや。');
     setTimeout(()=>{if(!running||token!==runToken||!dot)return;dot.classList.remove('on');document.body.classList.remove('pupil-chase','secret-mode');toggle.setAttribute('aria-pressed','false');setTimeout(()=>{if(token!==runToken)return;if(dot){dot.remove();dot=null}eyes.forEach(e=>e.remove());eyes=[];if(msg){msg.remove();msg=null}running=false;step=0},260)},1900)
   }
   function start(e){
