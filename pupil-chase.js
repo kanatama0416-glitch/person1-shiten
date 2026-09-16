@@ -44,30 +44,46 @@
     }
   }
 
-  let running=false,step=0,dot=null,msg=null,currentEye=null;
-  function say(text){if(!msg){msg=document.createElement('div');msg.className='pupil-msg';document.body.appendChild(msg)}msg.textContent=text;msg.classList.add('show');clearTimeout(say.t);say.t=setTimeout(()=>msg.classList.remove('show'),1050)}
+  let running=false,step=0,dot=null,msg=null,currentEye=null,runToken=0;
+  function say(text){if(!msg){msg=document.createElement('div');msg.className='pupil-msg';document.body.appendChild(msg)}msg.textContent=text;msg.classList.add('show');clearTimeout(say.t);say.t=setTimeout(()=>{if(msg)msg.classList.remove('show')},1050)}
   function center(el){const r=el.getBoundingClientRect();return{x:r.left+scrollX+r.width/2,y:r.top+scrollY+r.height/2}}
   function clearCurrent(){if(currentEye){currentEye.classList.remove('runner-here');currentEye=null}}
-  function moveToEye(){
-    if(step>=eyes.length){finish();return}
-    const eye=eyes[step];eye.scrollIntoView({behavior:'smooth',block:'center'});
-    setTimeout(()=>{clearCurrent();currentEye=eye;eye.classList.add('runner-here','eye-pop');setTimeout(()=>eye.classList.remove('eye-pop'),450);const p=center(eye.querySelector('.escape-iris'));dot.style.left=p.x+'px';dot.style.top=p.y+'px'},280);
+  function cancel(){
+    runToken++;
+    clearTimeout(say.t);
+    clearCurrent();
+    document.body.classList.remove('pupil-chase','secret-mode');
+    toggle.setAttribute('aria-pressed','false');
+    if(dot){dot.remove();dot=null}
+    eyes.forEach(e=>e.remove());eyes=[];
+    if(msg){msg.remove();msg=null}
+    running=false;step=0;
   }
-  function catchDot(e){e.preventDefault();e.stopPropagation();clearCurrent();step++;if(step<eyes.length){say(step===1?'次の目へ！':step===3?'まだ逃げる！':'こっちこっち！');moveToEye()}else finish()}
+  function moveToEye(){
+    if(!running)return;
+    if(step>=eyes.length){finish();return}
+    const token=runToken,eye=eyes[step];eye.scrollIntoView({behavior:'smooth',block:'center'});
+    setTimeout(()=>{if(!running||token!==runToken||!dot||!eye.isConnected)return;clearCurrent();currentEye=eye;eye.classList.add('runner-here','eye-pop');setTimeout(()=>{if(eye.isConnected)eye.classList.remove('eye-pop')},450);const p=center(eye.querySelector('.escape-iris'));dot.style.left=p.x+'px';dot.style.top=p.y+'px'},280);
+  }
+  function catchDot(e){e.preventDefault();e.stopPropagation();if(!running)return;clearCurrent();step++;if(step<eyes.length){say(step===1?'次の目へ！':step===3?'まだ逃げる！':'こっちこっち！');moveToEye()}else finish()}
   function finish(){
+    if(!running||!dot)return;
+    const token=runToken;
     clearCurrent();const iris=toggle.querySelector('.secret-iris');const p=center(iris);dot.style.position='fixed';dot.style.left=(p.x-scrollX)+'px';dot.style.top=(p.y-scrollY)+'px';say('ただいま。');
-    setTimeout(()=>{dot.classList.remove('on');document.body.classList.remove('pupil-chase','secret-mode');toggle.setAttribute('aria-pressed','false');setTimeout(()=>{dot.remove();dot=null;eyes.forEach(e=>e.remove());eyes=[];running=false;step=0},260)},520)
+    setTimeout(()=>{if(!running||token!==runToken||!dot)return;dot.classList.remove('on');document.body.classList.remove('pupil-chase','secret-mode');toggle.setAttribute('aria-pressed','false');setTimeout(()=>{if(token!==runToken)return;if(dot){dot.remove();dot=null}eyes.forEach(e=>e.remove());eyes=[];if(msg){msg.remove();msg=null}running=false;step=0},260)},520)
   }
   function start(e){
-    if(running)return;e.preventDefault();e.stopImmediatePropagation();
-    running=true;step=0;
+    if(running){e.preventDefault();e.stopImmediatePropagation();cancel();return}
+    e.preventDefault();e.stopImmediatePropagation();
+    running=true;step=0;runToken++;
+    const token=runToken;
     // Restore the original hidden-eye gimmicks while keeping inline copy untouched.
     document.body.classList.add('secret-mode','pupil-chase');
     toggle.setAttribute('aria-pressed','true');
     buildEyes();
     const iris=toggle.querySelector('.secret-iris'),p=center(iris);
     dot=document.createElement('button');dot.type='button';dot.className='pupil-runner';dot.setAttribute('aria-label','逃げた黒目をつかまえる');dot.style.left=p.x+'px';dot.style.top=p.y+'px';document.body.appendChild(dot);dot.addEventListener('click',catchDot);
-    requestAnimationFrame(()=>{dot.classList.add('on');say('黒目が逃げた！ 目の中を探して！');setTimeout(moveToEye,240)})
+    requestAnimationFrame(()=>{if(!running||token!==runToken||!dot)return;dot.classList.add('on');say('黒目が逃げた！ 目の中を探して！');setTimeout(()=>{if(running&&token===runToken)moveToEye()},240)})
   }
   toggle.addEventListener('click',start,true);
 })();
