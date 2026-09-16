@@ -1,0 +1,231 @@
+name: Live Browser Matrix Check
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/browser-matrix-check.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  browser-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Selenium
+        run: python -m pip install --disable-pip-version-check selenium
+
+      - name: Check live sites in Android and desktop Chrome
+        run: |
+          cat > /tmp/check_sites.py <<'PY'
+          import json, os, time, traceback
+          from pathlib import Path
+          from selenium import webdriver
+          from selenium.webdriver.common.by import By
+          from selenium.webdriver.common.action_chains import ActionChains
+          from selenium.webdriver.support.ui import WebDriverWait
+          from selenium.webdriver.support import expected_conditions as EC
+          from selenium.common.exceptions import TimeoutException, WebDriverException
+
+          OUT = Path('browser-matrix-screenshots')
+          OUT.mkdir(exist_ok=True)
+          SITES = {
+              'about': 'https://kanatama0416-glitch.github.io/about-shiten/',
+              '01': 'https://kanatama0416-glitch.github.io/person1-shiten/',
+              '02': 'https://kanatama0416-glitch.github.io/person2-shiten/',
+              '03': 'https://kanatama0416-glitch.github.io/person3-shiten/',
+              '04': 'https://kanatama0416-glitch.github.io/person4-shiten/',
+              '05': 'https://kanatama0416-glitch.github.io/person5-shiten/',
+          }
+          ENVS = {
+              'android': {
+                  'size': (412, 915),
+                  'ua': 'Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Mobile Safari/537.36'
+              },
+              'desktop': {'size': (1440, 900), 'ua': None},
+          }
+          report = []
+          failures = []
+
+          def make_driver(env):
+              opt = webdriver.ChromeOptions()
+              opt.add_argument('--headless=new')
+              opt.add_argument('--no-sandbox')
+              opt.add_argument('--disable-dev-shm-usage')
+              opt.add_argument('--hide-scrollbars')
+              opt.add_argument('--force-device-scale-factor=1')
+              opt.set_capability('goog:loggingPrefs', {'browser': 'ALL'})
+              if env['ua']:
+                  opt.add_argument('--user-agent=' + env['ua'])
+              d = webdriver.Chrome(options=opt)
+              d.set_window_size(*env['size'])
+              d.set_page_load_timeout(35)
+              return d
+
+          def js(d, code, *args):
+              return d.execute_script(code, *args)
+
+          def wait_page(d, key):
+              WebDriverWait(d, 20).until(lambda x: x.execute_script('return document.readyState') in ('interactive','complete'))
+              WebDriverWait(d, 20).until(lambda x: 'ページを読み込めませんでした。' not in x.find_element(By.TAG_NAME,'body').text)
+              if key != 'about':
+                  try:
+                      WebDriverWait(d, 10).until(lambda x: not x.find_element(By.TAG_NAME,'body').get_attribute('class').find('intro-lock') >= 0)
+                  except Exception:
+                      # Some pages can already have removed the intro node/body class.
+                      pass
+              time.sleep(.45)
+
+          def shot(d, env_name, key, state):
+              p = OUT / f'{env_name}-{key}-{state}.png'
+              d.save_screenshot(str(p))
+              return str(p)
+
+          def visible(d, sel):
+              try:
+                  e=d.find_element(By.CSS_SELECTOR,sel)
+                  return e.is_displayed()
+              except Exception:
+                  return False
+
+          def common_checks(d, env_name, key):
+              body = d.find_element(By.TAG_NAME, 'body').text
+              assert 'ページを読み込めませんでした。' not in body, 'load error fallback is visible'
+              dims = js(d, 'return {vw:innerWidth, sw:document.documentElement.scrollWidth, bh:document.body.scrollHeight}')
+              # Intentional clipped decorative elements are allowed, but page must not create a large horizontal canvas.
+              assert dims['sw'] <= dims['vw'] + 4, f'horizontal overflow: scrollWidth={dims["sw"]}, viewport={dims["vw"]}'
+              if key != 'about':
+                  assert len(d.find_elements(By.CSS_SELECTOR,'.v')) == 5, 'five viewpoint navigation links not found'
+                  assert visible(d,'.about-shiten-link'), 'About link is not visible'
+                  btn = d.find_element(By.CSS_SELECTOR,'#secretToggle,#tearToggle')
+                  r = js(d, 'const r=arguments[0].getBoundingClientRect();return {left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width};', btn)
+                  if env_name == 'desktop':
+                      assert 900 <= (r['left']+r['right'])/2 <= 1060, f'desktop eye button too far from content: {r}'
+                  else:
+                      assert r['right'] >= dims['vw']-35, f'mobile eye button not near right edge: {r}'
+              return dims
+
+          def check_about(d, env_name):
+              assert visible(d,'#heroEye'), 'About hero eye missing'
+              main = js(d, 'const r=document.querySelector("main").getBoundingClientRect();return {left:r.left,right:r.right,width:r.width};')
+              if env_name == 'desktop':
+                  assert 715 <= main['width'] <= 725, f'About main width unexpected: {main}'
+                  assert abs((main['left']+main['right'])/2 - 720) <= 3, f'About main not centered: {main}'
+              eye = d.find_element(By.ID,'heroEye')
+              ActionChains(d).move_to_element(eye).click_and_hold().move_by_offset(0,45).release().perform()
+              WebDriverWait(d, 4).until(lambda x: 'on' in x.find_element(By.CSS_SELECTOR,'.game-ball').get_attribute('class'))
+              ball = d.find_element(By.CSS_SELECTOR,'.game-ball')
+              br = js(d,'const r=arguments[0].getBoundingClientRect();return {left:r.left,right:r.right,top:r.top,bottom:r.bottom};',ball)
+              if env_name == 'desktop':
+                  assert br['left'] >= main['left']-2 and br['right'] <= main['right']+2, f'game ball outside centered main: ball={br}, main={main}'
+              return {'game_started': True, 'ball_rect': br, 'main_rect': main}
+
+          def check_01(d):
+              b=d.find_element(By.ID,'secretToggle'); b.click(); time.sleep(.25)
+              assert js(d,'return document.body.classList.contains("secret-mode")'), '01 secret mode did not activate'
+              return {'secret_mode': True}
+
+          def check_02(d):
+              b=d.find_element(By.ID,'secretToggle'); b.click()
+              WebDriverWait(d,5).until(lambda x: x.find_element(By.ID,'eyeRoom').get_attribute('open') is not None)
+              room=d.find_element(By.ID,'eyeRoom')
+              foods=d.find_elements(By.CSS_SELECTOR,'.room-food')
+              assert foods, '02 room opened but no food was spawned'
+              foods[0].click(); time.sleep(.45)
+              count=int(d.find_element(By.CSS_SELECTOR,'.room-count b').text)
+              assert count >= 1, f'02 feeding did not increment count: {count}'
+              return {'room_open': True, 'feed_count': count}
+
+          def check_03(d):
+              b=d.find_element(By.ID,'secretToggle'); b.click()
+              WebDriverWait(d,3).until(lambda x: x.execute_script('return document.body.classList.contains("cat-ready")'))
+              WebDriverWait(d,3).until(lambda x: x.execute_script('return document.documentElement.classList.contains("cat-night")'))
+              js(d,'window.scrollBy(0,520)'); time.sleep(.35)
+              paws=len(d.find_elements(By.CSS_SELECTOR,'.cat-paw'))
+              assert paws > 0, '03 cat mode activated but paw trail did not appear after scroll'
+              return {'cat_ready': True, 'cat_night': True, 'paw_count': paws}
+
+          def check_04(d):
+              b=d.find_element(By.ID,'tearToggle'); b.click(); time.sleep(.35)
+              garden=d.find_element(By.ID,'p4Garden')
+              stage=garden.get_attribute('data-stage') or ''
+              paths=len(d.find_elements(By.CSS_SELECTOR,'#p4GardenSvg path'))
+              assert paths > 0 and garden.value_of_css_property('display') != 'none', f'04 garden did not build: stage={stage}, paths={paths}'
+              # Current control script should make the next press hide it.
+              b.click(); time.sleep(.15)
+              assert garden.value_of_css_property('display') == 'none', '04 second eye press did not hide the garden'
+              return {'garden_built': True, 'garden_paths': paths, 'second_press_hides': True}
+
+          def check_05(d):
+              b=d.find_element(By.ID,'secretToggle'); b.click()
+              WebDriverWait(d,3).until(lambda x: len(x.find_elements(By.CSS_SELECTOR,'.final-finale.on')) > 0)
+              time.sleep(.2)
+              assert visible(d,'.final-finale'), '05 finale element exists but is not visible'
+              # Current control script should allow closing the finale from the same eye.
+              b=d.find_element(By.ID,'secretToggle'); b.click(); time.sleep(.2)
+              assert len(d.find_elements(By.CSS_SELECTOR,'.final-finale')) == 0, '05 second eye press did not close finale'
+              return {'finale_opened': True, 'second_press_closes': True}
+
+          CHECKS={'about':check_about,'01':check_01,'02':check_02,'03':check_03,'04':check_04,'05':check_05}
+
+          for env_name, env in ENVS.items():
+              for key, url in SITES.items():
+                  d=None
+                  row={'environment':env_name,'site':key,'url':url,'ok':False}
+                  try:
+                      d=make_driver(env)
+                      d.get(url + '?matrix_check=20260916')
+                      wait_page(d,key)
+                      row['initial_screenshot']=shot(d,env_name,key,'initial')
+                      row['layout']=common_checks(d,env_name,key)
+                      row['interaction']=CHECKS[key](d,env_name) if key=='about' else CHECKS[key](d)
+                      row['interaction_screenshot']=shot(d,env_name,key,'interaction')
+                      severe=[]
+                      try:
+                          for entry in d.get_log('browser'):
+                              if entry.get('level')=='SEVERE' and 'favicon.ico' not in entry.get('message',''):
+                                  severe.append(entry.get('message',''))
+                      except Exception:
+                          pass
+                      row['severe_console']=severe
+                      # Resource errors may be noisy; JavaScript exceptions are critical.
+                      js_errors=[m for m in severe if 'Uncaught' in m or 'javascript' in m.lower()]
+                      assert not js_errors, 'JavaScript console errors: ' + ' | '.join(js_errors[:3])
+                      row['ok']=True
+                  except Exception as e:
+                      row['error']=f'{type(e).__name__}: {e}'
+                      row['traceback']=traceback.format_exc(limit=4)
+                      failures.append(f'{env_name}/{key}: {row["error"]}')
+                      if d:
+                          try: row['failure_screenshot']=shot(d,env_name,key,'FAIL')
+                          except Exception: pass
+                  finally:
+                      if d:
+                          try: d.quit()
+                          except Exception: pass
+                      report.append(row)
+
+          Path('browser-matrix-report.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8')
+          with open('browser-matrix-summary.txt','w',encoding='utf-8') as f:
+              for r in report:
+                  f.write(('PASS' if r['ok'] else 'FAIL')+f"  {r['environment']:8} {r['site']}"+(('  '+r.get('error','')) if not r['ok'] else '')+'\n')
+          print(Path('browser-matrix-summary.txt').read_text())
+          if failures:
+              print('\nFAILURES:')
+              print('\n'.join(failures))
+              raise SystemExit(1)
+          PY
+          python /tmp/check_sites.py
+
+      - name: Upload matrix screenshots and report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: live-browser-matrix-results
+          path: |
+            browser-matrix-screenshots
+            browser-matrix-report.json
+            browser-matrix-summary.txt
+          if-no-files-found: error
