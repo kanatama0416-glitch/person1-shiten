@@ -1,0 +1,118 @@
+name: Live Browser Matrix Check v2
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/browser-matrix-check-v2.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  browser-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Selenium
+        run: python -m pip install --disable-pip-version-check selenium
+      - name: Check live sites in Android and desktop Chrome
+        run: |
+          cat > /tmp/check_sites.py <<'PY'
+          import json, time, traceback
+          from pathlib import Path
+          from selenium import webdriver
+          from selenium.webdriver.common.by import By
+          from selenium.webdriver.common.action_chains import ActionChains
+          from selenium.webdriver.support.ui import WebDriverWait
+
+          OUT=Path('browser-matrix-screenshots'); OUT.mkdir(exist_ok=True)
+          SITES={'about':'https://kanatama0416-glitch.github.io/about-shiten/','01':'https://kanatama0416-glitch.github.io/person1-shiten/','02':'https://kanatama0416-glitch.github.io/person2-shiten/','03':'https://kanatama0416-glitch.github.io/person3-shiten/','04':'https://kanatama0416-glitch.github.io/person4-shiten/','05':'https://kanatama0416-glitch.github.io/person5-shiten/'}
+          ENVS={'android':{'size':(412,915),'ua':'Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Mobile Safari/537.36'},'desktop':{'size':(1440,900),'ua':None}}
+          report=[]; failures=[]
+          def make_driver(env):
+              o=webdriver.ChromeOptions()
+              for a in ('--headless=new','--no-sandbox','--disable-dev-shm-usage','--hide-scrollbars','--force-device-scale-factor=1'): o.add_argument(a)
+              o.set_capability('goog:loggingPrefs',{'browser':'ALL'})
+              if env['ua']: o.add_argument('--user-agent='+env['ua'])
+              d=webdriver.Chrome(options=o); d.set_window_size(*env['size']); d.set_page_load_timeout(35); return d
+          def js(d,c,*a): return d.execute_script(c,*a)
+          def visible(d,s):
+              try:return d.find_element(By.CSS_SELECTOR,s).is_displayed()
+              except:return False
+          def wait_page(d,key):
+              WebDriverWait(d,20).until(lambda x:x.execute_script('return document.readyState') in ('interactive','complete'))
+              WebDriverWait(d,20).until(lambda x:'ページを読み込めませんでした。' not in x.find_element(By.TAG_NAME,'body').text)
+              if key!='about':
+                  WebDriverWait(d,20).until(lambda x:len(x.find_elements(By.CSS_SELECTOR,'.page'))>0)
+                  WebDriverWait(d,20).until(lambda x:len(x.find_elements(By.CSS_SELECTOR,'#secretToggle,#tearToggle'))>0)
+                  WebDriverWait(d,20).until(lambda x:len(x.find_elements(By.CSS_SELECTOR,'.intro'))==0 and 'intro-lock' not in x.find_element(By.TAG_NAME,'body').get_attribute('class'))
+                  WebDriverWait(d,20).until(lambda x:len(x.find_elements(By.CSS_SELECTOR,'#shiten-pc-position-fix'))>0)
+              time.sleep(.7)
+          def shot(d,e,k,s): p=OUT/f'{e}-{k}-{s}.png';d.save_screenshot(str(p));return str(p)
+          def common(d,e,k):
+              assert 'ページを読み込めませんでした。' not in d.find_element(By.TAG_NAME,'body').text
+              dims=js(d,'return {vw:innerWidth,sw:document.documentElement.scrollWidth,bh:document.body.scrollHeight}')
+              assert dims['sw']<=dims['vw']+4,f'horizontal overflow {dims}'
+              if k!='about':
+                  assert len(d.find_elements(By.CSS_SELECTOR,'.v'))==5,'view nav count'
+                  assert visible(d,'.about-shiten-link'),'About link hidden'
+                  b=d.find_element(By.CSS_SELECTOR,'#secretToggle,#tearToggle');r=js(d,'const r=arguments[0].getBoundingClientRect();return {left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width}',b)
+                  if e=='desktop':assert 900<=(r['left']+r['right'])/2<=1060,f'desktop eye position {r}'
+                  else:assert r['right']>=dims['vw']-35,f'mobile eye position {r}'
+              return dims
+          def about(d,e):
+              main=js(d,'const r=document.querySelector("main").getBoundingClientRect();return {left:r.left,right:r.right,width:r.width}')
+              if e=='desktop':assert 715<=main['width']<=725 and abs((main['left']+main['right'])/2-720)<=3,f'main {main}'
+              eye=d.find_element(By.ID,'heroEye');ActionChains(d).move_to_element(eye).click_and_hold().move_by_offset(0,45).release().perform()
+              WebDriverWait(d,4).until(lambda x:'on' in x.find_element(By.CSS_SELECTOR,'.game-ball').get_attribute('class'))
+              ball=d.find_element(By.CSS_SELECTOR,'.game-ball');br=js(d,'const r=arguments[0].getBoundingClientRect();return {left:r.left,right:r.right,top:r.top,bottom:r.bottom}',ball)
+              if e=='desktop':assert br['left']>=main['left']-2 and br['right']<=main['right']+2,f'ball {br} main {main}'
+              return {'game_started':True,'ball_rect':br,'main_rect':main}
+          def p01(d):
+              d.find_element(By.ID,'secretToggle').click();time.sleep(.25);assert js(d,'return document.body.classList.contains("secret-mode")'),'secret-mode';return {'secret_mode':True}
+          def p02(d):
+              d.find_element(By.ID,'secretToggle').click();WebDriverWait(d,5).until(lambda x:x.find_element(By.ID,'eyeRoom').get_attribute('open') is not None)
+              food=d.find_elements(By.CSS_SELECTOR,'.room-food');assert food,'no food';food[0].click();time.sleep(.45);c=int(d.find_element(By.CSS_SELECTOR,'.room-count b').text);assert c>=1,f'feed {c}';return {'room_open':True,'feed_count':c}
+          def p03(d):
+              d.find_element(By.ID,'secretToggle').click();WebDriverWait(d,3).until(lambda x:js(x,'return document.body.classList.contains("cat-ready")'));WebDriverWait(d,3).until(lambda x:js(x,'return document.documentElement.classList.contains("cat-night")'));js(d,'window.scrollBy(0,520)');time.sleep(.45);p=len(d.find_elements(By.CSS_SELECTOR,'.cat-paw'));assert p>0,'no paws';return {'cat_ready':True,'cat_night':True,'paw_count':p}
+          def p04(d):
+              b=d.find_element(By.ID,'tearToggle');b.click();time.sleep(.45);g=d.find_element(By.ID,'p4Garden');n=len(d.find_elements(By.CSS_SELECTOR,'#p4GardenSvg path'));assert n>0 and g.value_of_css_property('display')!='none',f'garden {n}';b.click();time.sleep(.2);assert g.value_of_css_property('display')=='none','second click did not hide';return {'garden_built':True,'garden_paths':n,'second_press_hides':True}
+          def p05(d):
+              d.find_element(By.ID,'secretToggle').click();WebDriverWait(d,3).until(lambda x:len(x.find_elements(By.CSS_SELECTOR,'.final-finale.on'))>0);assert visible(d,'.final-finale'),'finale hidden';time.sleep(.2);d.find_element(By.ID,'secretToggle').click();time.sleep(.2);assert len(d.find_elements(By.CSS_SELECTOR,'.final-finale'))==0,'second click did not close';return {'finale_opened':True,'second_press_closes':True}
+          checks={'about':about,'01':p01,'02':p02,'03':p03,'04':p04,'05':p05}
+          for env,conf in ENVS.items():
+              for key,url in SITES.items():
+                  d=None;row={'environment':env,'site':key,'url':url,'ok':False}
+                  try:
+                      d=make_driver(conf);d.get(url+'?matrix_check=20260916c');wait_page(d,key);row['initial_screenshot']=shot(d,env,key,'initial');row['layout']=common(d,env,key);row['interaction']=checks[key](d,env) if key=='about' else checks[key](d);row['interaction_screenshot']=shot(d,env,key,'interaction')
+                      severe=[]
+                      try:severe=[x.get('message','') for x in d.get_log('browser') if x.get('level')=='SEVERE' and 'favicon.ico' not in x.get('message','')]
+                      except:pass
+                      row['severe_console']=severe;js_err=[m for m in severe if 'Uncaught' in m or 'javascript' in m.lower()];shared=[m for m in severe if 'person1-shiten/' in m and 'Failed to load resource' in m];assert not js_err,'JS errors '+str(js_err[:3]);assert not shared,'shared 404 '+str(shared[:3]);row['ok']=True
+                  except Exception as ex:
+                      row['error']=f'{type(ex).__name__}: {ex}';row['traceback']=traceback.format_exc(limit=4);failures.append(f'{env}/{key}: {row["error"]}')
+                      if d:
+                          try:row['failure_screenshot']=shot(d,env,key,'FAIL')
+                          except:pass
+                  finally:
+                      if d:
+                          try:d.quit()
+                          except:pass
+                      report.append(row)
+          Path('browser-matrix-report.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8')
+          Path('browser-matrix-summary.txt').write_text('\n'.join(('PASS' if r['ok'] else 'FAIL')+f"  {r['environment']:8} {r['site']}"+(('  '+r.get('error','')) if not r['ok'] else '') for r in report)+'\n',encoding='utf-8')
+          print(Path('browser-matrix-summary.txt').read_text())
+          if failures:print('\nFAILURES:\n'+'\n'.join(failures));raise SystemExit(1)
+          PY
+          python /tmp/check_sites.py
+      - name: Upload matrix screenshots and report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: live-browser-matrix-results-v2
+          path: |
+            browser-matrix-screenshots
+            browser-matrix-report.json
+            browser-matrix-summary.txt
+          if-no-files-found: error
