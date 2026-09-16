@@ -188,10 +188,10 @@ body.cat-ready #secretToggle.shiten-attract-look::after{transform:translate(calc
       later(clearTease,1250);
     }
 
-    if(isPerson2)later(teaser02,4300);
-    if(isPerson3)later(teaser03,4300);
-    if(isPerson4)later(teaser04,4300);
-    if(isPerson5)later(teaser05,4300);
+    if(isPerson2)later(teaser02,8100);
+    if(isPerson3)later(teaser03,8100);
+    if(isPerson4)later(teaser04,8100);
+    if(isPerson5)later(teaser05,8100);
 
     later(function(){
       if(done)return;
