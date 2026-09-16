@@ -18,17 +18,69 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Prepare linked viewpoint pages and shared scripts
+      - name: Build static 01 page
         run: |
           mkdir -p public
-          cp index.html public/index.html
           cp ./*.js public/
+          cp ./*.html public/
           python3 - <<'PY'
           from pathlib import Path
-          p = Path('public/index.html')
-          s = p.read_text(encoding='utf-8')
-          s = s.replace('href="person2.html"', 'href="https://kanatama0416-glitch.github.io/person2-shiten/"')
-          p.write_text(s, encoding='utf-8')
+          import os
+
+          html = Path('base.html').read_text(encoding='utf-8')
+
+          # Keep the shortened intro used by the current 01 page.
+          html = html.replace('},1050);introEye.animate','},250);introEye.animate')
+          html = html.replace('duration:1650,delay:1250','duration:650,delay:250')
+          html = html.replace('duration:1450,delay:1500','duration:600,delay:300')
+          html = html.replace('},2980)','},1050)')
+
+          # Keep horizontal overflow protection and the About return link.
+          extra_css = '''html,body{max-width:100%;overflow-x:hidden!important;overscroll-behavior-x:none}.about-shiten-link{position:relative;z-index:20;display:inline-flex;align-items:center;gap:9px;margin:14px 0 0 14px;padding:8px 11px 8px 9px;background:#111;color:#fff!important;text-decoration:none!important;border:2px solid #111;box-shadow:3px 3px 0 #ff4f87;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif}.about-shiten-link i{display:block;width:27px;height:16px;border:2px solid #fff;border-radius:50%;position:relative}.about-shiten-link i:after{content:"";position:absolute;width:7px;height:7px;border-radius:50%;background:#ff4f87;left:8px;top:2.5px}.about-shiten-link strong{display:block;font-size:12px;line-height:1.05;letter-spacing:.02em}.about-shiten-link small{display:block;margin-top:3px;font:700 7px/1 Arial,sans-serif;letter-spacing:.14em;opacity:.72}.about-shiten-link:active{transform:translate(2px,2px);box-shadow:1px 1px 0 #ff4f87}'''
+          html = html.replace('<style>', '<style>' + extra_css, 1)
+          about = 'https://kanatama0416-glitch.github.io/about-shiten/'
+          about_link = '<a class="about-shiten-link" href="'+about+'" aria-label="視展についてへ戻る"><i aria-hidden="true"></i><span><strong>← 視展について</strong><small>ABOUT SHITEN</small></span></a>'
+          html = html.replace('<body class="intro-lock">', '<body class="intro-lock">' + about_link, 1)
+
+          # Keep the latest 01 copy.
+          start = html.find('<section class="essay">')
+          end = html.find('</section>', start)
+          if start < 0 or end < 0:
+              raise RuntimeError('essay section not found')
+          end += len('</section>')
+          new_essay = '''<section class="essay"><span class="secret-eye" aria-hidden="true"></span><p>毎日同じ道を歩く。同じ電車に乗る。<br>変わらないように見える日々の中で、毎日見ていたはずのものに、ある日初めて気づくことがある。</p><p>何かを知ったり、誰かと出会ったりして、自分の中に少し変化が生まれる。すると、それまで気にも留めなかったものが、ふと気にかかるようになる。</p><p>そんなとき、私は「世界の解像度が上がった」と感じる。<br>粗いピクセルの中では見えなかったものが、輪郭を持って見えてくるように。気づけるものが増え、同じ景色から受け取れる意味が増えていく。</p><p>そのきっかけは、人によっても、そのときどきによっても違う。<br>私の場合は、アートとの出会いがきっかけになることが多い。</p><p>私にとってアートに触れることは、自分が見過ごしていたものに着目し、ときには執着するほど見つめてきた人の視点に触れることでもある。<br>なぜ、この人はここが気になったのだろう。何を見つけ、どんなふうに感じていたのだろう。</p><p>作品を通してその人の視点に触れると、自分の中にも、ものの見方が一つ増える。それまで背景に溶け込んでいたものが気になったり、見慣れたものに別の意味を感じたりする。</p><p>誰かの視点を通して、自分の世界が少し広がる。<br>アートに触れたあと、いつもの道が少し違って見える。その変化が、私にとってアートの面白さなのだと思う。</p></section>'''
+          html = html[:start] + new_essay + html[end:]
+
+          old_onsen = '横尾忠則が訪れた温泉地での出来事と、そこから生まれた絵を一緒に見ることができます。個人的な記憶や経験が、どのように作品へとつながっていくのか。その人が見たものと、描いたものの間をたどることができる一冊です。'
+          new_onsen = '横尾忠則の作品には、目にした景色や体験、感じたこと、空想したことが重なり合っている。なぜこの絵になったのだろう、と不思議に思うことも多い。『温泉主義』では、温泉を旅した紀行文と、その土地をモチーフにした作品が並び、作品の背景をたどることができる。不思議だった絵に、彼の記憶や感情の重なりが見えてくる。同じ絵なのに、読み取れるものが増えていく。行き先には有名な温泉地も多く、この本を読んだあとに実際にその土地を訪ねれば、彼の内側に広がっていた世界と、目の前の風景とが重なり合い、作品をより深く感じられるのではないかと思う。'
+          html = html.replace(old_onsen, new_onsen)
+
+          pages = [
+              'https://kanatama0416-glitch.github.io/person1-shiten/',
+              'https://kanatama0416-glitch.github.io/person2-shiten/',
+              'https://kanatama0416-glitch.github.io/person3-shiten/',
+              'https://kanatama0416-glitch.github.io/person4-shiten/',
+              'https://kanatama0416-glitch.github.io/person5-shiten/'
+          ]
+          old_links = [
+              '<a class="v" href="#" aria-current="page">',
+              '<a class="v" href="person2.html">',
+              '<a class="v" href="person3.html">',
+              '<a class="v" href="person4.html">',
+              '<a class="v" href="person5.html">'
+          ]
+          for i, (old, url) in enumerate(zip(old_links, pages)):
+              current = ' aria-current="page"' if i == 0 else ''
+              new = f'<a class="v" href="{url}" onclick="window.location.assign(\'{url}\');return false;"{current}>'
+              html = html.replace(old, new)
+
+          version = os.environ.get('GITHUB_SHA','static')[:10]
+          extras = f'''<script>document.addEventListener("click",function(e){{var b=e.target.closest&&e.target.closest("#secretToggle,#tearToggle");if(b)window.scrollTo(0,0)}},true);</script>
+          <script src="./pupil-chase.js?v={version}"></script>
+          <script src="./eye-attract.js?v={version}"></script>'''
+          html = html.replace('</body>', extras + '\n</body>', 1)
+
+          Path('public/index.html').write_text(html, encoding='utf-8')
           PY
       - name: Setup Pages
         uses: actions/configure-pages@v5
