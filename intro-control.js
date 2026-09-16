@@ -3,10 +3,15 @@
   var intro=document.getElementById('intro');
   if(!intro||!document.body.classList.contains('intro-lock'))return;
 
-  var key='shiten-intro-seen-v1';
-  var seen=false;
-  try{seen=sessionStorage.getItem(key)==='1';sessionStorage.setItem(key,'1');}catch(_){ }
-  var duration=seen?650:1700;
+  var key='shiten-intro-last-seen-v2';
+  var now=Date.now();
+  var seenRecently=false;
+  try{
+    var last=parseInt(localStorage.getItem(key)||'0',10)||0;
+    seenRecently=last>0&&(now-last)<30*60*1000;
+    localStorage.setItem(key,String(now));
+  }catch(_){ }
+  var duration=seenRecently?650:1700;
   var fade=Math.max(120,duration-280);
 
   function finish(){
