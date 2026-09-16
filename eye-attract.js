@@ -19,12 +19,15 @@ body.cat-ready #secretToggle.shiten-attract-look::after{transform:translate(calc
 #secretToggle.shiten-attract-near,#tearToggle.shiten-attract-near{opacity:.82!important;transform:translate(-9px,-9px) rotate(-3deg) scale(1.08)!important;box-shadow:3px 3px 0 #111!important}
 .shiten-eye-hint{position:fixed;z-index:2147483000;right:78px;bottom:19px;pointer-events:none;background:var(--p,#ff4f87);color:#111;border:3px solid #111;border-radius:999px;padding:10px 14px;font:900 14px/1.1 -apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif;white-space:nowrap;box-shadow:4px 4px 0 #111;opacity:0;transform:translate(10px,3px) scale(.88) rotate(-2deg);transition:opacity .18s ease,transform .22s cubic-bezier(.2,.85,.3,1.2)}
 .shiten-eye-hint::after{content:'→';display:inline-block;margin-left:5px;font-size:16px;line-height:1;transform:rotate(8deg)}
+.shiten-eye-hint.shiten-eye-hint-small{right:72px;bottom:24px;background:#fff;border-width:2px;padding:5px 8px;font-size:10px;font-weight:800;box-shadow:2px 2px 0 #111;transform:translate(7px,2px) scale(.94) rotate(-1deg);opacity:0}
+.shiten-eye-hint.shiten-eye-hint-small::after{margin-left:4px;font-size:11px}
 .shiten-eye-hint.shiten-eye-hint-show{opacity:1;transform:translate(0,0) scale(1) rotate(-2deg);animation:shitenHintBob 1.05s ease-in-out .28s infinite alternate}
+.shiten-eye-hint.shiten-eye-hint-small.shiten-eye-hint-show{opacity:.86;transform:translate(0,0) scale(1) rotate(-1deg);animation:shitenHintBob 1.2s ease-in-out .3s infinite alternate}
 .shiten-eye-question{position:fixed;z-index:2147483000;right:27px;bottom:63px;pointer-events:none;font:900 22px/1 Arial,sans-serif;color:#111;text-shadow:2px 2px 0 #fff;opacity:0;transform:translateY(5px) scale(.7) rotate(8deg);animation:shitenQuestion 1.65s ease both}
 @keyframes shitenEyeBlink{0%,100%{transform:rotate(-6deg) scaleY(1)}45%,58%{transform:rotate(-6deg) scaleY(.16)}}
 @keyframes shitenHintBob{from{margin-bottom:0}to{margin-bottom:4px}}
 @keyframes shitenQuestion{0%{opacity:0;transform:translateY(5px) scale(.7) rotate(8deg)}18%,70%{opacity:1;transform:translateY(0) scale(1) rotate(-4deg)}100%{opacity:0;transform:translateY(-4px) scale(.9) rotate(3deg)}}
-@media(max-width:390px){.shiten-eye-hint{right:74px;bottom:20px;padding:9px 12px;font-size:13px}}
+@media(max-width:390px){.shiten-eye-hint{right:74px;bottom:20px;padding:9px 12px;font-size:13px}.shiten-eye-hint.shiten-eye-hint-small{right:70px;bottom:25px;padding:4px 7px;font-size:9px}}
 @media(prefers-reduced-motion:reduce){#secretToggle.shiten-attract-blink,#tearToggle.shiten-attract-blink{animation:none}.shiten-eye-hint{transition:none}.shiten-eye-hint.shiten-eye-hint-show{animation:none}.shiten-eye-question{animation:none;opacity:1}.shiten-eye-question.shiten-eye-question-hide{opacity:0}}
 `;
     document.head.appendChild(style);
@@ -75,6 +78,20 @@ body.cat-ready #secretToggle.shiten-attract-look::after{transform:translate(calc
           later(removeHint,260);
         },8000);
       },650);
+    }else{
+      later(function(){
+        if(done)return;
+        hint=document.createElement('div');
+        hint.className='shiten-eye-hint shiten-eye-hint-small';
+        hint.textContent='クリックしてみて！';
+        document.body.appendChild(hint);
+        requestAnimationFrame(function(){if(hint)hint.classList.add('shiten-eye-hint-show');});
+        later(function(){
+          if(!hint)return;
+          hint.classList.remove('shiten-eye-hint-show');
+          later(removeHint,220);
+        },6500);
+      },900);
     }
 
     later(function(){
