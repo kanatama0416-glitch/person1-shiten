@@ -11,13 +11,15 @@
 <script>
 (async()=>{
   try{
-    let source=await(await fetch('https://raw.githubusercontent.com/kanatama0416-glitch/person1-shiten/e5ce9e4fb826eb71216219e71a38e921cfc98363/index.html',{cache:'no-store'})).text();
+    let source=await(await fetch('./core.html',{cache:'no-store'})).text();
+    source=source.replace('https://raw.githubusercontent.com/kanatama0416-glitch/person1-shiten/93246663e808f739feba769129b4593087c794cf/index.html','https://kanatama0416-glitch.github.io/person1-shiten/base.html');
     const pattern=/document\.open\(\);document\.write\(html\);document\.close\(\);?/;
     if(!pattern.test(source))throw new Error('patch marker not found');
-    const hook=`html=html.replace('</body>','<script>document.addEventListener("click",function(e){var b=e.target.closest&&e.target.closest("#secretToggle,#tearToggle");if(b)window.scrollTo(0,0)},true);<\\/script><script src="https://kanatama0416-glitch.github.io/person1-shiten/eye-attract.js?v=pcfix-20260916"><\\/script></body>');`;
+    const hook=`html=html.replace('</body>','<script>document.addEventListener("click",function(e){var b=e.target.closest&&e.target.closest("#secretToggle,#tearToggle");if(b)window.scrollTo(0,0)},true);<\\/script><script src="https://kanatama0416-glitch.github.io/person1-shiten/intro-control.js?v=20260916"><\\/script><script src="https://kanatama0416-glitch.github.io/person1-shiten/eye-attract.js?v=20260916-stable"><\\/script></body>');`;
     source=source.replace(pattern,m=>hook+m);
     document.open();document.write(source);document.close();
   }catch(e){
+    console.error(e);
     document.body.innerHTML='<div style="min-height:100vh;display:grid;place-items:center;font-family:system-ui">ページを読み込めませんでした。</div>';
   }
 })();
