@@ -5,6 +5,12 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/final-smoke-check.yml'
+      - 'index.html'
+      - 'base.html'
+      - 'core.html'
+      - 'pupil-chase.js'
+      - 'eye-attract.js'
+      - 'eye-attract-core.js'
   workflow_dispatch:
 
 permissions:
@@ -42,7 +48,8 @@ jobs:
           out={}
           def js(s,*a): return d.execute_script(s,*a)
           def load(key):
-            d.get(urls[key]+'?smoke=20260916-final')
+            d.get(urls[key]+'?smoke=20260916-toggle-check')
+            body=d.find_element(By.TAG_NAME,'body')
             W.until(lambda x:'ページを読み込めませんでした。' not in x.find_element(By.TAG_NAME,'body').text)
             if key!='about':
               W.until(lambda x:len(x.find_elements(By.CSS_SELECTOR,'.page'))>0)
@@ -51,7 +58,6 @@ jobs:
           def resources():
             return js("return performance.getEntriesByType('resource').map(x=>x.name)")
 
-          # About: normal touch area should allow vertical scrolling; goal arms game mode.
           load('about')
           W.until(lambda x:len(x.find_elements(By.ID,'goalEye'))>0)
           touch_before=js("return getComputedStyle(document.getElementById('heroEye')).touchAction")
@@ -62,17 +68,20 @@ jobs:
           assert not [u for u in resources() if 'raw.githubusercontent.com' in u],resources()
           out['about']={'touch_before':touch_before,'touch_after':touch_after}
 
-          # First intro should be shortened.
           t=load('01')
           W.until(lambda x:len(x.find_elements(By.CSS_SELECTOR,'.intro'))==0 and 'intro-lock' not in x.find_element(By.TAG_NAME,'body').get_attribute('class'))
           first_intro=time.time()-t
           assert first_intro<2.5,first_intro
-          d.find_element(By.ID,'secretToggle').click();time.sleep(.2)
-          assert js("return document.body.classList.contains('secret-mode')")
+          b=d.find_element(By.ID,'secretToggle')
+          b.click();time.sleep(.35)
+          assert js("return document.body.classList.contains('secret-mode')"), d.find_element(By.TAG_NAME,'body').get_attribute('class')
+          b.click();time.sleep(.35)
+          assert not js("return document.body.classList.contains('secret-mode')"), d.find_element(By.TAG_NAME,'body').get_attribute('class')
+          assert not js("return document.body.classList.contains('pupil-chase')"), d.find_element(By.TAG_NAME,'body').get_attribute('class')
+          assert len(d.find_elements(By.CSS_SELECTOR,'.pupil-runner,.escape-eye'))==0
           assert not [u for u in resources() if 'raw.githubusercontent.com' in u],resources()
-          out['01']={'intro':first_intro}
+          out['01']={'intro':first_intro,'toggle_off':True}
 
-          # Same-origin second page should use short intro and evolve at five feeds.
           t=load('02')
           W.until(lambda x:len(x.find_elements(By.CSS_SELECTOR,'.intro'))==0 and 'intro-lock' not in x.find_element(By.TAG_NAME,'body').get_attribute('class'))
           repeat_intro=time.time()-t
