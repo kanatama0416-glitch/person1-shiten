@@ -5,10 +5,8 @@
     if(!eye)return;
     eye.addEventListener('click',function(){
       requestAnimationFrame(function(){
-        document.body.classList.remove('secret-mode');
-        void document.body.offsetWidth;
-        document.body.classList.add('secret-mode');
-        eye.setAttribute('aria-pressed','true');
+        var on=document.body.classList.contains('secret-mode');
+        eye.setAttribute('aria-pressed',String(on));
       });
     });
   }
