@@ -9,6 +9,26 @@
         var style=document.createElement('style');
         style.id='shiten-pc-position-fix';
         style.textContent=`
+/* creator signature: keep it as a quiet continuation of the title */
+.creator-signature{
+  width:min(430px,92%);max-width:none!important;
+  margin:10px auto 0!important;padding:0!important;
+  text-align:left!important;position:relative;
+  font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif;
+}
+.creator-signature:before{display:none!important;content:none!important}
+.creator-signature__name,.creator-signature__role{display:inline!important;vertical-align:baseline}
+.creator-signature__name{font-size:12px!important;line-height:1.45!important;font-weight:900!important;letter-spacing:.02em!important;color:#111!important}
+.creator-signature__name:before{content:"by ";font-size:9px;font-weight:800;letter-spacing:.08em;color:#777}
+.creator-signature__role{margin:0!important;font-size:10px!important;line-height:1.45!important;font-weight:700!important;color:#666!important}
+.creator-signature__role:before{content:"  ｜  ";color:#aaa;font-weight:500}
+.creator-signature__bio{margin:3px 0 0!important;max-width:none!important;font-size:10.5px!important;line-height:1.55!important;color:#ff4f87!important;font-weight:700!important}
+@media(max-width:380px){
+  .creator-signature{width:92%!important;margin-top:9px!important;padding:0!important}
+  .creator-signature__name{font-size:11.5px!important}
+  .creator-signature__role{font-size:9.5px!important}
+  .creator-signature__bio{font-size:10px!important}
+}
 @media (min-width:760px){
   #secretToggle,#tearToggle,.p4-eye-toggle{right:calc((100vw - 620px)/2 + 14px)!important}
   .shiten-eye-hint{right:calc((100vw - 620px)/2 + 78px)!important}
