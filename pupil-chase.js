@@ -13,7 +13,9 @@
   .escape-eye.eye-pop{animation:escapeEyePop .42s cubic-bezier(.2,.9,.3,1.2)}
   @keyframes escapeEyePop{50%{transform:scale(1.18,.82) rotate(var(--rot,0deg))}}
   .pupil-runner{position:absolute;width:11px;height:11px;border:0;padding:0;border-radius:50%;background:#111;z-index:10050;transform:translate(-50%,-50%) scale(0);transition:left .48s cubic-bezier(.18,.9,.3,1.12),top .48s cubic-bezier(.18,.9,.3,1.12),transform .2s ease;cursor:pointer;touch-action:manipulation;box-shadow:none}
-  .pupil-runner.on{transform:translate(-50%,-50%) scale(1)}.pupil-runner:active{transform:translate(-50%,-50%) scale(.72)}
+  .pupil-runner.on{transform:translate(-50%,-50%) scale(1)}
+  .pupil-runner.launching{transform:translate(-50%,-50%) scale(1.35);transition:left .42s cubic-bezier(.12,.82,.28,1.16),top .42s cubic-bezier(.12,.82,.28,1.16),transform .16s ease}
+  .pupil-runner:active{transform:translate(-50%,-50%) scale(.72)}
   body.pupil-chase .secret-iris:after{opacity:0}
   body.pupil-chase.secret-mode .view-swap .view-word{display:inline!important}
   body.pupil-chase.secret-mode .view-swap .view-eye-inline{display:none!important;animation:none!important}
@@ -49,7 +51,7 @@
     }
   }
 
-  let running=false,started=false,step=0,dot=null,msg=null,currentEye=null,runToken=0;
+  let running=false,started=false,launchDone=false,step=0,dot=null,msg=null,currentEye=null,runToken=0;
   function say(text){if(!msg){msg=document.createElement('div');msg.className='pupil-msg';document.body.appendChild(msg)}msg.textContent=text;msg.classList.add('show');clearTimeout(say.t);say.t=setTimeout(()=>{if(msg)msg.classList.remove('show')},1900)}
   function center(el){const r=el.getBoundingClientRect();return{x:r.left+scrollX+r.width/2,y:r.top+scrollY+r.height/2}}
   function clearCurrent(){if(currentEye){currentEye.classList.remove('runner-here');currentEye=null}}
@@ -62,7 +64,7 @@
     if(dot){dot.remove();dot=null}
     eyes.forEach(e=>e.remove());eyes=[];
     if(msg){msg.remove();msg=null}
-    running=false;started=false;step=0;
+    running=false;started=false;launchDone=false;step=0;
   }
   function moveToEye(){
     if(!running)return;
@@ -70,10 +72,34 @@
     const token=runToken,eye=eyes[step];eye.scrollIntoView({behavior:'smooth',block:'center'});
     setTimeout(()=>{if(!running||token!==runToken||!dot||!eye.isConnected)return;clearCurrent();currentEye=eye;eye.classList.add('runner-here','eye-pop');setTimeout(()=>{if(eye.isConnected)eye.classList.remove('eye-pop')},450);const p=center(eye.querySelector('.escape-iris'));dot.style.left=p.x+'px';dot.style.top=p.y+'px'},280);
   }
+  function launchAndWait(token,startPoint){
+    if(!dot)return;
+    const vw=Math.max(document.documentElement.clientWidth||0,window.innerWidth||0);
+    const vh=Math.max(document.documentElement.clientHeight||0,window.innerHeight||0);
+    const targetX=scrollX+Math.min(vw-48,Math.max(48,vw*.67));
+    const targetY=scrollY+Math.min(vh-110,Math.max(120,vh*.43));
+    requestAnimationFrame(()=>{
+      if(!running||token!==runToken||!dot)return;
+      dot.classList.add('on','launching');
+      say('黒目が逃げた！');
+      requestAnimationFrame(()=>{
+        if(!running||token!==runToken||!dot)return;
+        dot.style.left=targetX+'px';
+        dot.style.top=targetY+'px';
+      });
+      setTimeout(()=>{
+        if(!running||token!==runToken||!dot)return;
+        dot.classList.remove('launching');
+        launchDone=true;
+        say('黒目をつかまえてみて。');
+      },470);
+    });
+  }
   function catchDot(e){
-    e.preventDefault();e.stopPropagation();if(!running)return;
+    e.preventDefault();e.stopPropagation();if(!running||!launchDone)return;
     if(!started){
       started=true;
+      say(chaseLines[0]);
       moveToEye();
       return;
     }
@@ -85,19 +111,19 @@
     if(!running||!dot)return;
     const token=runToken;
     clearCurrent();const iris=toggle.querySelector('.secret-iris');const p=center(iris);dot.style.position='fixed';dot.style.left=(p.x-scrollX)+'px';dot.style.top=(p.y-scrollY)+'px';say('やっぱ、ここがいいや。');
-    setTimeout(()=>{if(!running||token!==runToken||!dot)return;dot.classList.remove('on');document.body.classList.remove('pupil-chase','secret-mode');toggle.setAttribute('aria-pressed','false');setTimeout(()=>{if(token!==runToken)return;if(dot){dot.remove();dot=null}eyes.forEach(e=>e.remove());eyes=[];if(msg){msg.remove();msg=null}running=false;started=false;step=0},260)},1900)
+    setTimeout(()=>{if(!running||token!==runToken||!dot)return;dot.classList.remove('on');document.body.classList.remove('pupil-chase','secret-mode');toggle.setAttribute('aria-pressed','false');setTimeout(()=>{if(token!==runToken)return;if(dot){dot.remove();dot=null}eyes.forEach(e=>e.remove());eyes=[];if(msg){msg.remove();msg=null}running=false;started=false;launchDone=false;step=0},260)},1900)
   }
   function start(e){
     if(running){e.preventDefault();e.stopImmediatePropagation();cancel();return}
     e.preventDefault();e.stopImmediatePropagation();
-    running=true;started=false;step=0;runToken++;
+    running=true;started=false;launchDone=false;step=0;runToken++;
     const token=runToken;
     document.body.classList.add('secret-mode','pupil-chase');
     toggle.setAttribute('aria-pressed','true');
     buildEyes();
     const iris=toggle.querySelector('.secret-iris'),p=center(iris);
     dot=document.createElement('button');dot.type='button';dot.className='pupil-runner';dot.setAttribute('aria-label','逃げた黒目をつかまえる');dot.style.left=p.x+'px';dot.style.top=p.y+'px';document.body.appendChild(dot);dot.addEventListener('click',catchDot);
-    requestAnimationFrame(()=>{if(!running||token!==runToken||!dot)return;dot.classList.add('on');say(chaseLines[0])})
+    launchAndWait(token,p);
   }
   toggle.addEventListener('click',start,true);
 })();
