@@ -72,7 +72,12 @@
     const token=runToken,eye=eyes[step];eye.scrollIntoView({behavior:'smooth',block:'center'});
     setTimeout(()=>{if(!running||token!==runToken||!dot||!eye.isConnected)return;clearCurrent();currentEye=eye;eye.classList.add('runner-here','eye-pop');setTimeout(()=>{if(eye.isConnected)eye.classList.remove('eye-pop')},450);const p=center(eye.querySelector('.escape-iris'));dot.style.left=p.x+'px';dot.style.top=p.y+'px'},280);
   }
-  function catchDot(e){e.preventDefault();e.stopPropagation();if(!running)return;clearCurrent();step++;if(step<eyes.length){say(chaseLines[step]||'黒目にも自由を。');moveToEye()}else finish()}
+  function catchDot(e){
+    e.preventDefault();e.stopPropagation();if(!running)return;
+    clearCurrent();
+    step++;
+    if(step<eyes.length){say(chaseLines[step]||'黒目にも自由を。');moveToEye()}else finish();
+  }
   function finish(){
     if(!running||!dot)return;
     const token=runToken;
@@ -82,7 +87,7 @@
   function start(e){
     if(running){e.preventDefault();e.stopImmediatePropagation();cancel();return}
     e.preventDefault();e.stopImmediatePropagation();
-    running=true;step=0;runToken++;
+    running=true;step=-1;runToken++;
     const token=runToken;
     // Restore the original hidden-eye gimmicks while keeping inline copy untouched.
     document.body.classList.add('secret-mode','pupil-chase');
@@ -90,7 +95,7 @@
     buildEyes();
     const iris=toggle.querySelector('.secret-iris'),p=center(iris);
     dot=document.createElement('button');dot.type='button';dot.className='pupil-runner';dot.setAttribute('aria-label','逃げた黒目をつかまえる');dot.style.left=p.x+'px';dot.style.top=p.y+'px';document.body.appendChild(dot);dot.addEventListener('click',catchDot);
-    requestAnimationFrame(()=>{if(!running||token!==runToken||!dot)return;dot.classList.add('on');say(chaseLines[0]);setTimeout(()=>{if(running&&token===runToken)moveToEye()},240)})
+    requestAnimationFrame(()=>{if(!running||token!==runToken||!dot)return;dot.classList.add('on');say('黒目を触ってみて。')})
   }
   toggle.addEventListener('click',start,true);
 })();
