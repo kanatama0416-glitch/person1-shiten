@@ -19,6 +19,8 @@
   body.pupil-chase.secret-mode .view-swap .view-word{display:inline!important}
   body.pupil-chase.secret-mode .view-swap .view-eye-inline{display:none!important;animation:none!important}
   .pupil-msg{position:fixed;z-index:10060;left:50%;bottom:72px;transform:translateX(-50%) translateY(8px);background:#fff;border:3px solid #111;box-shadow:4px 4px 0 var(--p);padding:7px 12px;font:900 11px/1.2 system-ui,sans-serif;opacity:0;pointer-events:none;transition:.2s;white-space:nowrap}.pupil-msg.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  .pupil-guide{position:absolute;z-index:10061;background:#fff;border:2px solid #111;box-shadow:2px 2px 0 var(--p);padding:5px 8px;border-radius:10px;font:900 10px/1.2 system-ui,sans-serif;white-space:nowrap;pointer-events:none;animation:pupilGuideBob .7s ease-in-out infinite alternate}
+  @keyframes pupilGuideBob{from{transform:translateY(0)}to{transform:translateY(-4px)}}
   `;
   document.head.appendChild(style);
 
@@ -51,13 +53,23 @@
     }
   }
 
-  let running=false,step=0,dot=null,msg=null,currentEye=null,runToken=0;
+  let running=false,step=0,dot=null,msg=null,guide=null,currentEye=null,runToken=0;
   function say(text){if(!msg){msg=document.createElement('div');msg.className='pupil-msg';document.body.appendChild(msg)}msg.textContent=text;msg.classList.add('show');clearTimeout(say.t);say.t=setTimeout(()=>{if(msg)msg.classList.remove('show')},1900)}
   function center(el){const r=el.getBoundingClientRect();return{x:r.left+scrollX+r.width/2,y:r.top+scrollY+r.height/2}}
   function clearCurrent(){if(currentEye){currentEye.classList.remove('runner-here');currentEye=null}}
+  function clearGuide(){if(guide){guide.remove();guide=null}}
+  function showGuide(p){
+    clearGuide();
+    guide=document.createElement('div');guide.className='pupil-guide';guide.textContent='黒目を押してみて！';
+    document.body.appendChild(guide);
+    const maxLeft=scrollX+Math.max(8,window.innerWidth-guide.offsetWidth-12);
+    guide.style.left=Math.min(p.x+14,maxLeft)+'px';
+    guide.style.top=(p.y+14)+'px';
+  }
   function cancel(){
     runToken++;
     clearTimeout(say.t);
+    clearGuide();
     clearCurrent();
     document.body.classList.remove('pupil-chase','secret-mode');
     toggle.setAttribute('aria-pressed','false');
@@ -70,12 +82,13 @@
     if(!running)return;
     if(step>=eyes.length){finish();return}
     const token=runToken,eye=eyes[step];eye.scrollIntoView({behavior:'smooth',block:'center'});
-    setTimeout(()=>{if(!running||token!==runToken||!dot||!eye.isConnected)return;clearCurrent();currentEye=eye;eye.classList.add('runner-here','eye-pop');setTimeout(()=>{if(eye.isConnected)eye.classList.remove('eye-pop')},450);const p=center(eye.querySelector('.escape-iris'));dot.style.left=p.x+'px';dot.style.top=p.y+'px'},280);
+    setTimeout(()=>{if(!running||token!==runToken||!dot||!eye.isConnected)return;clearCurrent();currentEye=eye;eye.classList.add('runner-here','eye-pop');setTimeout(()=>{if(eye.isConnected)eye.classList.remove('eye-pop')},450);const p=center(eye.querySelector('.escape-iris'));dot.style.left=p.x+'px';dot.style.top=p.y+'px';if(step===0){setTimeout(()=>{if(running&&token===runToken&&step===0&&dot)showGuide(center(dot))},520)}},280);
   }
-  function catchDot(e){e.preventDefault();e.stopPropagation();if(!running)return;clearCurrent();step++;if(step<eyes.length){say(chaseLines[step]||'黒目にも自由を。');moveToEye()}else finish()}
+  function catchDot(e){e.preventDefault();e.stopPropagation();if(!running)return;clearGuide();clearCurrent();step++;if(step<eyes.length){say(chaseLines[step]||'黒目にも自由を。');moveToEye()}else finish()}
   function finish(){
     if(!running||!dot)return;
     const token=runToken;
+    clearGuide();
     clearCurrent();const iris=toggle.querySelector('.secret-iris');const p=center(iris);dot.style.position='fixed';dot.style.left=(p.x-scrollX)+'px';dot.style.top=(p.y-scrollY)+'px';say('やっぱ、ここがいいや。');
     setTimeout(()=>{if(!running||token!==runToken||!dot)return;dot.classList.remove('on');document.body.classList.remove('pupil-chase','secret-mode');toggle.setAttribute('aria-pressed','false');setTimeout(()=>{if(token!==runToken)return;if(dot){dot.remove();dot=null}eyes.forEach(e=>e.remove());eyes=[];if(msg){msg.remove();msg=null}running=false;step=0},260)},1900)
   }
