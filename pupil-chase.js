@@ -51,7 +51,7 @@
     }
   }
 
-  let running=false,step=0,dot=null,msg=null,currentEye=null,runToken=0;
+  let running=false,started=false,step=0,dot=null,msg=null,currentEye=null,runToken=0;
   function say(text){if(!msg){msg=document.createElement('div');msg.className='pupil-msg';document.body.appendChild(msg)}msg.textContent=text;msg.classList.add('show');clearTimeout(say.t);say.t=setTimeout(()=>{if(msg)msg.classList.remove('show')},1900)}
   function center(el){const r=el.getBoundingClientRect();return{x:r.left+scrollX+r.width/2,y:r.top+scrollY+r.height/2}}
   function clearCurrent(){if(currentEye){currentEye.classList.remove('runner-here');currentEye=null}}
@@ -64,7 +64,7 @@
     if(dot){dot.remove();dot=null}
     eyes.forEach(e=>e.remove());eyes=[];
     if(msg){msg.remove();msg=null}
-    running=false;step=0;
+    running=false;started=false;step=0;
   }
   function moveToEye(){
     if(!running)return;
@@ -74,6 +74,12 @@
   }
   function catchDot(e){
     e.preventDefault();e.stopPropagation();if(!running)return;
+    if(!started){
+      started=true;
+      say(chaseLines[0]);
+      moveToEye();
+      return;
+    }
     clearCurrent();
     step++;
     if(step<eyes.length){say(chaseLines[step]||'黒目にも自由を。');moveToEye()}else finish();
@@ -82,12 +88,12 @@
     if(!running||!dot)return;
     const token=runToken;
     clearCurrent();const iris=toggle.querySelector('.secret-iris');const p=center(iris);dot.style.position='fixed';dot.style.left=(p.x-scrollX)+'px';dot.style.top=(p.y-scrollY)+'px';say('やっぱ、ここがいいや。');
-    setTimeout(()=>{if(!running||token!==runToken||!dot)return;dot.classList.remove('on');document.body.classList.remove('pupil-chase','secret-mode');toggle.setAttribute('aria-pressed','false');setTimeout(()=>{if(token!==runToken)return;if(dot){dot.remove();dot=null}eyes.forEach(e=>e.remove());eyes=[];if(msg){msg.remove();msg=null}running=false;step=0},260)},1900)
+    setTimeout(()=>{if(!running||token!==runToken||!dot)return;dot.classList.remove('on');document.body.classList.remove('pupil-chase','secret-mode');toggle.setAttribute('aria-pressed','false');setTimeout(()=>{if(token!==runToken)return;if(dot){dot.remove();dot=null}eyes.forEach(e=>e.remove());eyes=[];if(msg){msg.remove();msg=null}running=false;started=false;step=0},260)},1900)
   }
   function start(e){
     if(running){e.preventDefault();e.stopImmediatePropagation();cancel();return}
     e.preventDefault();e.stopImmediatePropagation();
-    running=true;step=-1;runToken++;
+    running=true;started=false;step=0;runToken++;
     const token=runToken;
     // Restore the original hidden-eye gimmicks while keeping inline copy untouched.
     document.body.classList.add('secret-mode','pupil-chase');
