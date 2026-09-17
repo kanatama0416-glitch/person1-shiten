@@ -35,7 +35,7 @@ html=html.replace(/<a class="v" href="[^"]*"(?: aria-current="page")?>/g,(match)
 });
 
 const extras='<script>document.addEventListener("click",function(e){var b=e.target.closest&&e.target.closest("#secretToggle,#tearToggle");if(b)window.scrollTo(0,0)},true);<\/script>'
-  +'<script src="./pupil-chase.js?v=20260918-pupil-tap-guide"><\/script>'
+  +'<script src="./pupil-chase.js?v=20260918-pupil-tap-guide-fixed"><\/script>'
   +'<script src="./eye-attract.js?v=20260916-stable"><\/script>';
 html=html.replace('</body>',extras+'</body>');
 
