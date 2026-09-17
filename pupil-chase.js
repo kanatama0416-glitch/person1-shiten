@@ -15,14 +15,12 @@
   .pupil-runner{position:absolute;width:11px;height:11px;border:0;padding:0;border-radius:50%;background:#111;z-index:10050;transform:translate(-50%,-50%) scale(0);transition:left .48s cubic-bezier(.18,.9,.3,1.12),top .48s cubic-bezier(.18,.9,.3,1.12),transform .2s ease;cursor:pointer;touch-action:manipulation;box-shadow:none}
   .pupil-runner.on{transform:translate(-50%,-50%) scale(1)}.pupil-runner:active{transform:translate(-50%,-50%) scale(.72)}
   body.pupil-chase .secret-iris:after{opacity:0}
-  /* Keep the original secret-eye play, but never replace copy containing 視点 with an inline eye. */
   body.pupil-chase.secret-mode .view-swap .view-word{display:inline!important}
   body.pupil-chase.secret-mode .view-swap .view-eye-inline{display:none!important;animation:none!important}
   .pupil-msg{position:fixed;z-index:10060;left:50%;bottom:72px;transform:translateX(-50%) translateY(8px);background:#fff;border:3px solid #111;box-shadow:4px 4px 0 var(--p);padding:7px 12px;font:900 11px/1.2 system-ui,sans-serif;opacity:0;pointer-events:none;transition:.2s;white-space:nowrap}.pupil-msg.show{opacity:1;transform:translateX(-50%) translateY(0)}
   `;
   document.head.appendChild(style);
 
-  // Dedicated chase eyes: independent of the word 視点.
   const targetSpecs=[
     {sel:'.essay',x:.88,y:.16,rot:'7deg'},
     {sel:'.book:nth-child(1)',x:.12,y:.34,rot:'-8deg'},
@@ -76,7 +74,6 @@
     e.preventDefault();e.stopPropagation();if(!running)return;
     if(!started){
       started=true;
-      say(chaseLines[0]);
       moveToEye();
       return;
     }
@@ -95,13 +92,12 @@
     e.preventDefault();e.stopImmediatePropagation();
     running=true;started=false;step=0;runToken++;
     const token=runToken;
-    // Restore the original hidden-eye gimmicks while keeping inline copy untouched.
     document.body.classList.add('secret-mode','pupil-chase');
     toggle.setAttribute('aria-pressed','true');
     buildEyes();
     const iris=toggle.querySelector('.secret-iris'),p=center(iris);
     dot=document.createElement('button');dot.type='button';dot.className='pupil-runner';dot.setAttribute('aria-label','逃げた黒目をつかまえる');dot.style.left=p.x+'px';dot.style.top=p.y+'px';document.body.appendChild(dot);dot.addEventListener('click',catchDot);
-    requestAnimationFrame(()=>{if(!running||token!==runToken||!dot)return;dot.classList.add('on');say('黒目を触ってみて。')})
+    requestAnimationFrame(()=>{if(!running||token!==runToken||!dot)return;dot.classList.add('on');say(chaseLines[0])})
   }
   toggle.addEventListener('click',start,true);
 })();
