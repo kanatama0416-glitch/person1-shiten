@@ -35,12 +35,21 @@ jobs:
           html = html.replace('duration:1450,delay:1500','duration:600,delay:300')
           html = html.replace('},2980)','},1050)')
 
-          # Keep horizontal overflow protection and the About return link.
-          extra_css = '''html,body{max-width:100%;overflow-x:hidden!important;overscroll-behavior-x:none}.about-shiten-link{position:relative;z-index:20;display:inline-flex;align-items:center;gap:9px;margin:14px 0 0 14px;padding:8px 11px 8px 9px;background:#111;color:#fff!important;text-decoration:none!important;border:2px solid #111;box-shadow:3px 3px 0 #ff4f87;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif}.about-shiten-link i{display:block;width:27px;height:16px;border:2px solid #fff;border-radius:50%;position:relative}.about-shiten-link i:after{content:"";position:absolute;width:7px;height:7px;border-radius:50%;background:#ff4f87;left:8px;top:2.5px}.about-shiten-link strong{display:block;font-size:12px;line-height:1.05;letter-spacing:.02em}.about-shiten-link small{display:block;margin-top:3px;font:700 7px/1 Arial,sans-serif;letter-spacing:.14em;opacity:.72}.about-shiten-link:active{transform:translate(2px,2px);box-shadow:1px 1px 0 #ff4f87}'''
+          # Keep horizontal overflow protection, About return link, and creator signature styling.
+          extra_css = '''html,body{max-width:100%;overflow-x:hidden!important;overscroll-behavior-x:none}.about-shiten-link{position:relative;z-index:20;display:inline-flex;align-items:center;gap:9px;margin:14px 0 0 14px;padding:8px 11px 8px 9px;background:#111;color:#fff!important;text-decoration:none!important;border:2px solid #111;box-shadow:3px 3px 0 #ff4f87;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif}.about-shiten-link i{display:block;width:27px;height:16px;border:2px solid #fff;border-radius:50%;position:relative}.about-shiten-link i:after{content:"";position:absolute;width:7px;height:7px;border-radius:50%;background:#ff4f87;left:8px;top:2.5px}.about-shiten-link strong{display:block;font-size:12px;line-height:1.05;letter-spacing:.02em}.about-shiten-link small{display:block;margin-top:3px;font:700 7px/1 Arial,sans-serif;letter-spacing:.14em;opacity:.72}.about-shiten-link:active{transform:translate(2px,2px);box-shadow:1px 1px 0 #ff4f87}.creator-signature{max-width:430px;margin:18px auto 0;padding-top:13px;position:relative;text-align:center}.creator-signature:before{content:"";position:absolute;top:0;left:50%;width:26px;height:3px;margin-left:-13px;border-radius:99px;background:#111}.creator-signature__name{font-size:16px;line-height:1.35;font-weight:900;letter-spacing:.02em}.creator-signature__role{margin-top:2px;font-size:10px;line-height:1.5;font-weight:800;color:#555}.creator-signature__bio{margin:5px auto 0!important;max-width:390px;font-size:11px;line-height:1.6;color:#555}@media(max-width:380px){.creator-signature{margin-top:15px;padding-top:12px}.creator-signature__bio{font-size:10.5px}}'''
           html = html.replace('<style>', '<style>' + extra_css, 1)
           about = 'https://kanatama0416-glitch.github.io/about-shiten/'
           about_link = '<a class="about-shiten-link" href="'+about+'" aria-label="視展についてへ戻る"><i aria-hidden="true"></i><span><strong>← 視展について</strong><small>ABOUT SHITEN</small></span></a>'
           html = html.replace('<body class="intro-lock">', '<body class="intro-lock">' + about_link, 1)
+
+          # Put the creator introduction directly below the page title.
+          signature = '<div class="creator-signature" aria-label="この視点を書いた人"><div class="creator-signature__name">かなち</div><div class="creator-signature__role">DX推進担当（〜9月）</div><p class="creator-signature__bio">ハムスター愛好家。写真とアプリ開発が趣味。10月から石川県民。</p></div>'
+          hero_start = html.find('<section class="hero">')
+          h1_end = html.find('</h1>', hero_start)
+          if hero_start < 0 or h1_end < 0:
+              raise RuntimeError('hero title not found')
+          h1_end += len('</h1>')
+          html = html[:h1_end] + signature + html[h1_end:]
 
           # Keep the latest 01 copy.
           start = html.find('<section class="essay">')
