@@ -75,7 +75,7 @@ jobs:
               text:document.body.innerText
             };
           """)
-          assert profile['count']==5, profile
+          assert profile['count']==4, profile
           assert not profile['sigOverflow'], profile
           assert not profile['overflow'], profile
           hobby=d.execute_script("""
@@ -85,7 +85,14 @@ jobs:
             return {w:r.width,h:r.height,text:b.innerText};
           """)
           assert hobby['w']>=68 and hobby['h']<=230, hobby
-          for expected in ['えまりん','カード事業部','企画・開発課インターン生','旅行や生き物など趣味が沢山あります。','古今東西の美術や工芸が好きです！']:
+          affiliation=d.execute_script("""
+            const all=[...document.querySelectorAll('.creator-spine')];
+            const b=all.find(x=>x.innerText.includes('カード事業部企画・開発課インターン生'));
+            const r=b.getBoundingClientRect();
+            return {w:r.width,h:r.height,text:b.innerText};
+          """)
+          assert affiliation['w']>=84 and affiliation['h']<=238, affiliation
+          for expected in ['えまりん','カード事業部企画・開発課インターン生','旅行や生き物など趣味が沢山あります。','古今東西の美術や工芸が好きです！']:
             assert expected in profile['text'], (expected, profile)
           b=d.find_element(By.ID,'secretToggle')
           b.click();time.sleep(.4)
