@@ -9,7 +9,7 @@
   body.pupil-chase .escape-eye{opacity:1;transform:scale(1) rotate(var(--rot,0deg))}
   .escape-eye .escape-iris{position:absolute;width:22px;height:22px;left:15px;top:3px;border:2px solid #111;border-radius:50%;background:var(--p)}
   .escape-eye .escape-pupil{position:absolute;width:9px;height:9px;left:50%;top:50%;transform:translate(-50%,-50%);border-radius:50%;background:#111;transition:opacity .12s ease}
-  .escape-eye .escape-label{position:absolute;left:50%;top:40px;transform:translateX(-50%);width:max-content;max-width:150px;background:#fff;border:2px solid #111;border-radius:10px;box-shadow:2px 2px 0 var(--p);padding:4px 7px;font:900 9px/1.2 system-ui,sans-serif;white-space:nowrap;color:#111;pointer-events:none}
+  .escape-eye .escape-label{position:absolute;left:50%;bottom:40px;transform:translateX(-50%);width:max-content;max-width:150px;background:#fff;border:2px solid #111;border-radius:10px;box-shadow:2px 2px 0 var(--p);padding:4px 7px;font:900 9px/1.2 system-ui,sans-serif;white-space:nowrap;color:#111;pointer-events:none}
   .escape-eye.runner-here .escape-pupil{opacity:0}
   .escape-eye.eye-pop{animation:escapeEyePop .42s cubic-bezier(.2,.9,.3,1.2)}
   @keyframes escapeEyePop{50%{transform:scale(1.18,.82) rotate(var(--rot,0deg))}}
