@@ -43,6 +43,35 @@ jobs:
           W.until(lambda x:len(x.find_elements(By.CSS_SELECTOR,'.page'))>0)
           W.until(lambda x:len(x.find_elements(By.ID,'secretToggle'))>0)
           W.until(lambda x:len(x.find_elements(By.CSS_SELECTOR,'.intro'))==0 and 'intro-lock' not in x.find_element(By.TAG_NAME,'body').get_attribute('class'))
+          d.set_window_size(393,915)
+          time.sleep(.2)
+          profile=d.execute_script("""
+            const sig=document.querySelector('.creator-signature');
+            const books=[...document.querySelectorAll('.creator-spine')];
+            const overflow=books.map((b,i)=>{
+              const t=b.querySelector('.creator-spine__text');
+              return {
+                i,
+                text:t?.innerText||'',
+                textBottom:t ? t.offsetTop+t.offsetHeight : 0,
+                clientHeight:b.clientHeight,
+                scrollHeight:b.scrollHeight,
+                scrollWidth:b.scrollWidth,
+                clientWidth:b.clientWidth
+              };
+            }).filter(x=>x.textBottom>x.clientHeight-4 || x.scrollHeight>x.clientHeight+2 || x.scrollWidth>x.clientWidth+2);
+            return {
+              count:books.length,
+              sigOverflow:sig ? sig.scrollWidth>sig.clientWidth+2 : true,
+              overflow,
+              text:document.body.innerText
+            };
+          """)
+          assert profile['count']==6, profile
+          assert not profile['sigOverflow'], profile
+          assert not profile['overflow'], profile
+          for expected in ['えまりん','カード事業部','企画・開発課インターン生','旅行や生き物など','趣味が沢山あります。','古今東西の美術や工芸が好きです！']:
+            assert expected in profile['text'], (expected, profile)
           b=d.find_element(By.ID,'secretToggle')
           b.click();time.sleep(.4)
           assert d.execute_script("return document.body.classList.contains('secret-mode')")
