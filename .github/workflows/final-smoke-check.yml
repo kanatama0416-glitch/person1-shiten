@@ -41,12 +41,12 @@ jobs:
           live=False
           for attempt in range(36):
             d.get(url+'&profile=thick-v1-'+str(attempt))
-            body=d.find_element(By.TAG_NAME,'body').text
+            body=d.execute_script("return document.body ? document.body.innerText : ''")
             if 'えまりん' in body and 'ありふれた「もの」に' in body:
               live=True
               break
             time.sleep(5)
-          assert live, d.find_element(By.TAG_NAME,'body').text
+          assert live, d.execute_script("return document.body ? document.body.innerText : ''")
           W.until(lambda x:'ページを読み込めませんでした。' not in x.find_element(By.TAG_NAME,'body').text)
           W.until(lambda x:len(x.find_elements(By.CSS_SELECTOR,'.page'))>0)
           W.until(lambda x:len(x.find_elements(By.ID,'secretToggle'))>0)
@@ -127,3 +127,74 @@ jobs:
           d.quit()
           PY
           python /tmp/check.py
+
+
+      - name: Check eye click cues across 01-05
+        run: |
+          python -m pip install --disable-pip-version-check selenium
+          cat > /tmp/check-eye-cues.py <<'PY'
+          import json,time
+          from selenium import webdriver
+          from selenium.webdriver.common.by import By
+          from selenium.webdriver.support.ui import WebDriverWait
+
+          pages = {
+            '01': ('https://kanatama0416-glitch.github.io/person1-shiten/?smoke=click-cue-20260919', 'blink'),
+            '02': ('https://kanatama0416-glitch.github.io/person2-shiten/?smoke=click-cue-20260919', 'food'),
+            '03': ('https://kanatama0416-glitch.github.io/person3-shiten/?smoke=click-cue-20260919', 'cat'),
+            '04': ('https://kanatama0416-glitch.github.io/person4-shiten/?smoke=click-cue-20260919', 'sprout'),
+            '05': ('https://kanatama0416-glitch.github.io/person5-shiten/?smoke=click-cue-20260919', 'color'),
+          }
+
+          o=webdriver.ChromeOptions()
+          for a in ['--headless=new','--no-sandbox','--disable-dev-shm-usage','--window-size=393,915']:
+            o.add_argument(a)
+          d=webdriver.Chrome(options=o)
+          d.set_page_load_timeout(35)
+          results={}
+
+          for key,(url,kind) in pages.items():
+            d.get(url+'&t='+str(int(time.time()*1000)))
+            W=WebDriverWait(d,25)
+            W.until(lambda x: 'ページを読み込めませんでした。' not in x.execute_script("return document.body ? document.body.innerText : ''"))
+            W.until(lambda x: len(x.find_elements(By.CSS_SELECTOR,'#secretToggle,#tearToggle'))>0)
+            W.until(lambda x: len(x.find_elements(By.CSS_SELECTOR,'.intro'))==0 and 'intro-lock' not in (x.find_element(By.TAG_NAME,'body').get_attribute('class') or ''))
+
+            eye=d.find_element(By.CSS_SELECTOR,'#secretToggle,#tearToggle')
+            opacity=d.execute_script("return getComputedStyle(arguments[0]).opacity",eye)
+            assert opacity=='1', (key,'opacity',opacity)
+
+            hint_seen=False
+            deadline=time.time()+4.5
+            while time.time()<deadline:
+              hints=d.find_elements(By.CSS_SELECTOR,'.shiten-eye-hint.shiten-eye-hint-show')
+              if hints and any('クリックしてみて！' in (h.text or '') for h in hints):
+                hint_seen=True
+                break
+              time.sleep(.12)
+            assert hint_seen, (key,'click hint not seen')
+
+            unique_seen=False
+            deadline=time.time()+10.5
+            while time.time()<deadline:
+              if kind=='blink':
+                unique_seen='shiten-attract-blink' in (eye.get_attribute('class') or '')
+              elif kind=='food':
+                unique_seen=bool(d.find_elements(By.CSS_SELECTOR,'.shiten-tease-food')) or 'shiten-tease-hungry' in (eye.get_attribute('class') or '')
+              elif kind=='cat':
+                unique_seen='shiten-v2-cat-eye' in (eye.get_attribute('class') or '')
+              elif kind=='sprout':
+                unique_seen=bool(d.find_elements(By.CSS_SELECTOR,'.shiten-v2-eye-sprout'))
+              elif kind=='color':
+                unique_seen='shiten-v3-color-spin' in (eye.get_attribute('class') or '')
+              if unique_seen:
+                break
+              time.sleep(.08)
+            assert unique_seen, (key,'unique cue not seen',kind,eye.get_attribute('class'))
+
+            results[key]={'opacity':opacity,'hint':'クリックしてみて！','unique':kind}
+
+          print(json.dumps(results,ensure_ascii=False,indent=2))
+          d.quit()
+          PY
+          python /tmp/check-eye-cues.py
