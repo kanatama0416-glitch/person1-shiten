@@ -30,7 +30,7 @@ jobs:
           from selenium.webdriver.common.by import By
           from selenium.webdriver.support.ui import WebDriverWait
 
-          url='https://kanatama0416-glitch.github.io/person1-shiten/?smoke=20260916-static-01'
+          url='https://kanatama0416-glitch.github.io/person1-shiten/?smoke=20260919-eye-v3'
           o=webdriver.ChromeOptions()
           for a in ['--headless=new','--no-sandbox','--disable-dev-shm-usage','--window-size=412,915']:
             o.add_argument(a)
@@ -47,14 +47,32 @@ jobs:
           b.click();time.sleep(.4)
           assert d.execute_script("return document.body.classList.contains('secret-mode')")
           assert d.execute_script("return document.body.classList.contains('pupil-chase')")
+          W.until(lambda x:len(x.find_elements(By.CSS_SELECTOR,'.escape-eye'))==5)
+          labels=d.find_elements(By.CSS_SELECTOR,'.escape-eye .escape-label')
+          assert len(labels)==5, len(labels)
+          assert all(x.text.strip()=='黒目をタッチしよう！' for x in labels), [x.text for x in labels]
+          assert d.execute_script("""
+            const q=s=>document.querySelector(s);
+            return getComputedStyle(q('.essay .secret-eye')).display==='none'
+              && getComputedStyle(q('.view-eye-inline')).display==='none'
+              && getComputedStyle(q('.book:nth-child(2)'),'::after').display==='none'
+              && getComputedStyle(q('.book:nth-child(4)'),'::after').display==='none';
+          """)
+          overlaps=d.execute_script("""
+            const targets=[...document.querySelectorAll('.escape-eye,.escape-eye .escape-label')];
+            const text=[...document.querySelectorAll('.essay p,.info p')];
+            const hit=(a,b)=>a.left<b.right&&a.right>b.left&&a.top<b.bottom&&a.bottom>b.top;
+            return targets.flatMap((el,i)=>text.filter(p=>hit(el.getBoundingClientRect(),p.getBoundingClientRect())).map(p=>[i,p.textContent.slice(0,30)]));
+          """)
+          assert not overlaps, overlaps
           b.click();time.sleep(.4)
           assert not d.execute_script("return document.body.classList.contains('secret-mode')"), d.find_element(By.TAG_NAME,'body').get_attribute('class')
           assert not d.execute_script("return document.body.classList.contains('pupil-chase')"), d.find_element(By.TAG_NAME,'body').get_attribute('class')
           assert len(d.find_elements(By.CSS_SELECTOR,'.pupil-runner,.escape-eye'))==0
           logs=d.get_log('browser')
-          severe=[x for x in logs if x.get('level')=='SEVERE']
+          severe=[x for x in logs if x.get('level')=='SEVERE' and 'favicon.ico' not in x.get('message','')]
           assert not severe,severe
-          print(json.dumps({'01':'load ok + toggle on/off ok','browser_logs':logs},ensure_ascii=False,indent=2))
+          print(json.dumps({'01':'load + 5 labels + no text overlap + decorative eyes hidden + toggle off ok','browser_logs':logs},ensure_ascii=False,indent=2))
           d.quit()
           PY
           python /tmp/check.py
