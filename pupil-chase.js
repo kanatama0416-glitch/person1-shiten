@@ -15,6 +15,10 @@
   .pupil-runner{position:absolute;width:11px;height:11px;border:0;padding:0;border-radius:50%;background:#111;z-index:10050;transform:translate(-50%,-50%) scale(0);transition:left .48s cubic-bezier(.18,.9,.3,1.12),top .48s cubic-bezier(.18,.9,.3,1.12),transform .2s ease;cursor:pointer;touch-action:manipulation;box-shadow:none}
   .pupil-runner.on{transform:translate(-50%,-50%) scale(1)}.pupil-runner:active{transform:translate(-50%,-50%) scale(.72)}
   body.pupil-chase .secret-iris:after{opacity:0}
+  /* During the chase, hide decorative eyes that are not interactive targets. */
+  body.pupil-chase .essay .secret-eye{display:none!important}
+  body.pupil-chase .book:nth-child(2)::after,
+  body.pupil-chase .book:nth-child(4)::after{display:none!important}
   /* Keep the original secret-eye play, but never replace copy containing 視点 with an inline eye. */
   body.pupil-chase.secret-mode .view-swap .view-word{display:inline!important}
   body.pupil-chase.secret-mode .view-swap .view-eye-inline{display:none!important;animation:none!important}
@@ -26,11 +30,11 @@
 
   // Dedicated chase eyes: independent of the word 視点.
   const targetSpecs=[
-    {sel:'.essay',x:.88,y:.16,rot:'7deg'},
-    {sel:'.book:nth-child(1)',x:.12,y:.34,rot:'-8deg'},
-    {sel:'.book:nth-child(3)',x:.88,y:.34,rot:'6deg'},
-    {sel:'.book:nth-child(5)',x:.13,y:.34,rot:'-5deg'},
-    {sel:'.views',x:.84,y:.18,rot:'8deg'}
+    {sel:'.essay',x:.88,y:0,dy:-24,rot:'7deg'},
+    {sel:'.book:nth-child(1) .cover',x:.12,y:.18,rot:'-8deg'},
+    {sel:'.book:nth-child(3) .cover',x:.88,y:.18,rot:'6deg'},
+    {sel:'.book:nth-child(5) .cover',x:.12,y:.18,rot:'-5deg'},
+    {sel:'.views',x:.88,y:0,dy:-22,rot:'8deg'}
   ];
   const chaseLines=[
     'ちょっと家出してくる。',
@@ -48,7 +52,7 @@
       const eye=document.createElement('div');eye.className='escape-eye';eye.style.setProperty('--rot',spec.rot);
       eye.innerHTML='<span class="escape-iris"><span class="escape-pupil"></span></span>';
       eye.style.left=(r.left+scrollX+r.width*spec.x-29)+'px';
-      eye.style.top=(r.top+scrollY+r.height*spec.y-17)+'px';
+      eye.style.top=(r.top+scrollY+r.height*spec.y-17+(spec.dy||0))+'px';
       document.body.appendChild(eye);eyes.push(eye);
     }
   }
@@ -61,7 +65,7 @@
   function showGuide(){
     clearGuide();
     if(!dot)return;
-    guide=document.createElement('div');guide.className='pupil-guide';guide.textContent='黒目を押してみて！';
+    guide=document.createElement('div');guide.className='pupil-guide';guide.textContent='黒目をタッチしよう！';
     document.body.appendChild(guide);
     const follow=()=>{
       if(!guide||!dot)return;
@@ -91,7 +95,7 @@
     if(!running)return;
     if(step>=eyes.length){finish();return}
     const token=runToken,eye=eyes[step];eye.scrollIntoView({behavior:'smooth',block:'center'});
-    setTimeout(()=>{if(!running||token!==runToken||!dot||!eye.isConnected)return;clearCurrent();currentEye=eye;eye.classList.add('runner-here','eye-pop');setTimeout(()=>{if(eye.isConnected)eye.classList.remove('eye-pop')},450);const p=center(eye.querySelector('.escape-iris'));dot.style.left=p.x+'px';dot.style.top=p.y+'px';if(step===0){setTimeout(()=>{if(running&&token===runToken&&step===0&&dot)showGuide()},540)}},280);
+    setTimeout(()=>{if(!running||token!==runToken||!dot||!eye.isConnected)return;clearCurrent();currentEye=eye;eye.classList.add('runner-here','eye-pop');setTimeout(()=>{if(eye.isConnected)eye.classList.remove('eye-pop')},450);const p=center(eye.querySelector('.escape-iris'));dot.style.left=p.x+'px';dot.style.top=p.y+'px';if(step===0){setTimeout(()=>{if(running&&token===runToken&&dot)showGuide()},540)}},280);
   }
   function catchDot(e){e.preventDefault();e.stopPropagation();if(!running)return;clearGuide();clearCurrent();step++;if(step<eyes.length){say(chaseLines[step]||'黒目にも自由を。');moveToEye()}else finish()}
   function finish(){
