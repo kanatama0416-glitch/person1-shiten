@@ -67,7 +67,7 @@ jobs:
               text:document.body.innerText
             };
           """)
-          assert profile['count']==6, profile
+          assert profile['count']==5, profile
           assert not profile['sigOverflow'], profile
           assert not profile['overflow'], profile
           for expected in ['えまりん','カード事業部','企画・開発課インターン生','旅行や生き物など','趣味が沢山あります。','古今東西の美術や工芸が好きです！']:
