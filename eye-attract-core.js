@@ -16,13 +16,13 @@
 #secretToggle.shiten-attract-look .tear-iris,#tearToggle.shiten-attract-look .tear-iris,
 #secretToggle.shiten-attract-look [class*="iris"],#tearToggle.shiten-attract-look [class*="iris"]{transform:translate(-5px,-4px)!important}
 body.cat-ready #secretToggle.shiten-attract-look::after{transform:translate(calc(-50% - 5px),calc(-50% - 4px))!important}
-#secretToggle.shiten-attract-near,#tearToggle.shiten-attract-near{opacity:.82!important;transform:translate(-9px,-9px) rotate(-3deg) scale(1.08)!important;box-shadow:3px 3px 0 #111!important}
+#secretToggle.shiten-attract-near,#tearToggle.shiten-attract-near{opacity:1!important;transform:translate(-9px,-9px) rotate(-3deg) scale(1.08)!important;box-shadow:3px 3px 0 #111!important}
 .shiten-eye-hint{position:fixed;z-index:2147483000;right:78px;bottom:19px;pointer-events:none;background:var(--p,#ff4f87);color:#111;border:3px solid #111;border-radius:999px;padding:10px 14px;font:900 14px/1.1 -apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif;white-space:nowrap;box-shadow:4px 4px 0 #111;opacity:0;transform:translate(10px,3px) scale(.88) rotate(-2deg);transition:opacity .18s ease,transform .22s cubic-bezier(.2,.85,.3,1.2)}
 .shiten-eye-hint::after{content:'→';display:inline-block;margin-left:5px;font-size:16px;line-height:1;transform:rotate(8deg)}
-.shiten-eye-hint.shiten-eye-hint-small{right:72px;bottom:24px;background:#fff;border-width:2px;padding:5px 8px;font-size:10px;font-weight:800;box-shadow:2px 2px 0 #111;transform:translate(7px,2px) scale(.94) rotate(-1deg);opacity:0}
+.shiten-eye-hint.shiten-eye-hint-small{right:72px;bottom:24px;background:var(--p,#ff4f87);border-width:3px;padding:8px 11px;font-size:12px;font-weight:900;box-shadow:3px 3px 0 #111;transform:translate(7px,2px) scale(.94) rotate(-1deg);opacity:0}
 .shiten-eye-hint.shiten-eye-hint-small::after{margin-left:4px;font-size:11px}
 .shiten-eye-hint.shiten-eye-hint-show{opacity:1;transform:translate(0,0) scale(1) rotate(-2deg);animation:shitenHintBob 1.05s ease-in-out .28s infinite alternate}
-.shiten-eye-hint.shiten-eye-hint-small.shiten-eye-hint-show{opacity:.86;transform:translate(0,0) scale(1) rotate(-1deg);animation:shitenHintBob 1.2s ease-in-out .3s infinite alternate}
+.shiten-eye-hint.shiten-eye-hint-small.shiten-eye-hint-show{opacity:1;transform:translate(0,0) scale(1) rotate(-1deg);animation:shitenHintBob 1.2s ease-in-out .3s infinite alternate}
 .shiten-eye-question{position:fixed;z-index:2147483000;right:27px;bottom:63px;pointer-events:none;font:900 22px/1 Arial,sans-serif;color:#111;text-shadow:2px 2px 0 #fff;opacity:0;transform:translateY(5px) scale(.7) rotate(8deg);animation:shitenQuestion 1.65s ease both}
 .shiten-gimmick-tease{position:fixed;z-index:2147482999;pointer-events:none}
 .shiten-tease-food{right:80px;bottom:29px;width:20px;height:13px;border:2px solid #111;border-radius:50%;background:#fff;animation:shitenFoodPeek 1.35s ease-in-out both}
@@ -110,7 +110,7 @@ body.cat-ready #secretToggle.shiten-attract-look::after{transform:translate(calc
         if(done)return;
         hint=document.createElement('div');
         hint.className='shiten-eye-hint';
-        hint.textContent='触ってみる？';
+        hint.textContent='クリックしてみて！';
         document.body.appendChild(hint);
         requestAnimationFrame(function(){if(hint)hint.classList.add('shiten-eye-hint-show');});
         later(function(){
