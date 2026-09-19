@@ -38,7 +38,15 @@ jobs:
           d=webdriver.Chrome(options=o)
           d.set_page_load_timeout(30)
           W=WebDriverWait(d,20)
-          d.get(url)
+          live=False
+          for attempt in range(36):
+            d.get(url+'&profile=thick-v1-'+str(attempt))
+            body=d.find_element(By.TAG_NAME,'body').text
+            if 'えまりん' in body and 'ありふれた「もの」に' in body:
+              live=True
+              break
+            time.sleep(5)
+          assert live, d.find_element(By.TAG_NAME,'body').text
           W.until(lambda x:'ページを読み込めませんでした。' not in x.find_element(By.TAG_NAME,'body').text)
           W.until(lambda x:len(x.find_elements(By.CSS_SELECTOR,'.page'))>0)
           W.until(lambda x:len(x.find_elements(By.ID,'secretToggle'))>0)
@@ -70,7 +78,14 @@ jobs:
           assert profile['count']==5, profile
           assert not profile['sigOverflow'], profile
           assert not profile['overflow'], profile
-          for expected in ['えまりん','カード事業部','企画・開発課インターン生','旅行や生き物など','趣味が沢山あります。','古今東西の美術や工芸が好きです！']:
+          hobby=d.execute_script("""
+            const all=[...document.querySelectorAll('.creator-spine')];
+            const b=all.find(x=>x.innerText.includes('旅行や生き物など趣味が沢山あります。'));
+            const r=b.getBoundingClientRect();
+            return {w:r.width,h:r.height,text:b.innerText};
+          """)
+          assert hobby['w']>=68 and hobby['h']<=230, hobby
+          for expected in ['えまりん','カード事業部','企画・開発課インターン生','旅行や生き物など趣味が沢山あります。','古今東西の美術や工芸が好きです！']:
             assert expected in profile['text'], (expected, profile)
           b=d.find_element(By.ID,'secretToggle')
           b.click();time.sleep(.4)
