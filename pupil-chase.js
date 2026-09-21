@@ -14,6 +14,8 @@
   .escape-eye.eye-pop{animation:escapeEyePop .42s cubic-bezier(.2,.9,.3,1.2)}
   @keyframes escapeEyePop{50%{transform:scale(1.18,.82) rotate(var(--rot,0deg))}}
   .pupil-runner{position:absolute;width:11px;height:11px;border:0;padding:0;border-radius:50%;background:#111;z-index:10050;transform:translate(-50%,-50%) scale(0);transition:left .48s cubic-bezier(.18,.9,.3,1.12),top .48s cubic-bezier(.18,.9,.3,1.12),transform .2s ease;cursor:pointer;touch-action:manipulation;box-shadow:none}
+  /* Keep the 11px pupil; enlarge only its invisible hit area. */
+  .pupil-runner::before{content:"";position:absolute;left:50%;top:50%;width:44px;height:44px;transform:translate(-50%,-50%);background:transparent}
   .pupil-runner.on{transform:translate(-50%,-50%) scale(1)}.pupil-runner:active{transform:translate(-50%,-50%) scale(.72)}
   body.pupil-chase .secret-iris:after{opacity:0}
   /* 01: non-interactive decorative eyes are always hidden. */
