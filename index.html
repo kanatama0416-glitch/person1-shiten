@@ -25,6 +25,15 @@ html=html.replace(/(<section class="hero">[\s\S]*?<h1>[\s\S]*?<\/h1>)/i,(match)=
 
 const newEssay='<section class="essay"><span class="secret-eye" aria-hidden="true"></span><p>服や本、コンクリートや土、赤や青などの色彩、光や影…私たちの生活は、様々な物質や事象にあふれています。このように私たちが普段何気なく接している「もの」を、アーティストたちは独自の視点で見つめ、美しさや面白さを丁寧に見出し表現します。アーティスト自身の言葉や作品や彼らの思想が綴られた本を通して、そうした新しい「もの」の見方を知った時、私の目を通して見る世界も、今までよりも新鮮な美しさや面白さに満ちあふれたものに感じられます。</p></section>';
 html=html.replace(/<section class="essay">[\s\S]*?<\/section>/,newEssay);
+html=html.replace('<p class="note">※ 表紙はレイアウト確認用の仮イメージです。</p>','');
+const newBooks='<section class="books">'
+  +'<article class="book"><div class="cover"><div class="mock m1 real-cover"><img class="book-cover-photo" src="./book-covers/book_cover_01_1.jpg" alt="おすすめ書籍1の表紙"></div></div><b class="num">1</b><div class="info"></div></article>'
+  +'<article class="book"><div class="cover"><div class="mock m2 real-cover"><img class="book-cover-photo" src="./book-covers/book_cover_01_2.jpg" alt="おすすめ書籍2の表紙"></div></div><b class="num">2</b><div class="info"></div></article>'
+  +'<article class="book"><div class="cover"><div class="mock m3 real-cover"><img class="book-cover-photo" src="./book-covers/book_cover_01_3.jpg" alt="おすすめ書籍3の表紙"></div></div><b class="num">3</b><div class="info"></div></article>'
+  +'<article class="book"><div class="cover"><div class="mock m4 real-cover"><img class="book-cover-photo" src="./book-covers/book_cover_01_4.jpg" alt="おすすめ書籍4の表紙"></div></div><b class="num">4</b><div class="info"></div></article>'
+  +'</section>';
+html=html.replace(/<section class="books">[\s\S]*?<\/section>/,newBooks);
+html=html.replace('</head>','<style id="real-book-covers">.real-cover{display:flex;align-items:center;justify-content:center;background:#f7f5ef}.real-cover:before,.real-cover:after{display:none!important}.book-cover-photo{display:block;width:auto;height:auto;max-width:100%;max-height:100%;object-fit:contain}</style></head>');
 
 const oldOnsen2='横尾忠則が訪れた温泉地での出来事と、そこから生まれた絵を一緒に見ることができます。個人的な記憶や経験が、どのように作品へとつながっていくのか。その人が見たものと、描いたものの間をたどることができる一冊です。';
 const newOnsen='横尾忠則の作品には、目にした景色や体験、感じたこと、空想したことが重なり合っている。なぜこの絵になったのだろう、と不思議に思うことも多い。『温泉主義』では、温泉を旅した紀行文と、その土地をモチーフにした作品が並び、作品の背景をたどることができる。不思議だった絵に、彼の記憶や感情の重なりが見えてくる。同じ絵なのに、読み取れるものが増えていく。行き先には有名な温泉地も多く、この本を読んだあとに実際にその土地を訪ねれば、彼の内側に広がっていた世界と、目の前の風景とが重なり合い、作品をより深く感じられるのではないかと思う。';
