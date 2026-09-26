@@ -27,10 +27,10 @@ const newEssay='<section class="essay"><span class="secret-eye" aria-hidden="tru
 html=html.replace(/<section class="essay">[\s\S]*?<\/section>/,newEssay);
 html=html.replace('<p class="note">※ 表紙はレイアウト確認用の仮イメージです。</p>','');
 const newBooks='<section class="books">'
-  +'<article class="book"><div class="cover"><div class="mock m1 real-cover"><img class="book-cover-photo" src="./book-covers/book_cover_01_1.jpg" alt="おすすめ書籍1の表紙"></div></div><b class="num">1</b><div class="info"></div></article>'
-  +'<article class="book"><div class="cover"><div class="mock m2 real-cover"><img class="book-cover-photo" src="./book-covers/book_cover_01_2.jpg" alt="おすすめ書籍2の表紙"></div></div><b class="num">2</b><div class="info"></div></article>'
-  +'<article class="book"><div class="cover"><div class="mock m3 real-cover"><img class="book-cover-photo" src="./book-covers/book_cover_01_3.jpg" alt="おすすめ書籍3の表紙"></div></div><b class="num">3</b><div class="info"></div></article>'
-  +'<article class="book"><div class="cover"><div class="mock m4 real-cover"><img class="book-cover-photo" src="./book-covers/book_cover_01_4.jpg" alt="おすすめ書籍4の表紙"></div></div><b class="num">4</b><div class="info"></div></article>'
+  +'<article class="book"><div class="cover"><div class="mock m1 real-cover"><img class="book-cover-photo" src="https://media.neimanmarcus.com/f_auto%2Cq_auto%3Agood%2Car_4%3A5%2Cc_fill%2Cdpr_2.0%2Cw_540/01/nm_4854157_100000_m" alt="おすすめ書籍1の表紙"></div></div><b class="num">1</b><div class="info"></div></article>'
+  +'<article class="book"><div class="cover"><div class="mock m2 real-cover"><img class="book-cover-photo" src="https://www.extrabuch.com/media/images/popup/978-952-7222-16-4.jpg" alt="おすすめ書籍2の表紙"></div></div><b class="num">2</b><div class="info"></div></article>'
+  +'<article class="book"><div class="cover"><div class="mock m3 real-cover"><img class="book-cover-photo" src="https://prcdn.freetls.fastly.net/release_image/113046/15/113046-15-2e17fc229adb28f8036f616de2929e3c-3506x2307.jpg?auto=webp&bg-color=fff&fit=bounds&format=jpeg&height=1350&quality=85%2C65&width=1950" alt="おすすめ書籍3の表紙"></div></div><b class="num">3</b><div class="info"></div></article>'
+  +'<article class="book"><div class="cover"><div class="mock m4 real-cover"><img class="book-cover-photo" src="https://baseec-img-mng.akamaized.net/images/item/origin/ef27d832463adef28d7d568c7d32b31e.png?im=Resize%2Cwidth%3D1280%2Ctype%3Dnormal&imformat=generic&q=90" alt="おすすめ書籍4の表紙"></div></div><b class="num">4</b><div class="info"></div></article>'
   +'</section>';
 html=html.replace(/<section class="books">[\s\S]*?<\/section>/,newBooks);
 html=html.replace('</head>','<style id="real-book-covers">.real-cover{display:flex;align-items:center;justify-content:center;background:#f7f5ef}.real-cover:before,.real-cover:after{display:none!important}.book-cover-photo{display:block;width:auto;height:auto;max-width:100%;max-height:100%;object-fit:contain}</style></head>');
