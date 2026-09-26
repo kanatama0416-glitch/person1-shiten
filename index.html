@@ -26,12 +26,53 @@ html=html.replace(/(<section class="hero">[\s\S]*?<h1>[\s\S]*?<\/h1>)/i,(match)=
 const newEssay='<section class="essay"><span class="secret-eye" aria-hidden="true"></span><p>服や本、コンクリートや土、赤や青などの色彩、光や影…私たちの生活は、様々な物質や事象にあふれています。このように私たちが普段何気なく接している「もの」を、アーティストたちは独自の視点で見つめ、美しさや面白さを丁寧に見出し表現します。アーティスト自身の言葉や作品や彼らの思想が綴られた本を通して、そうした新しい「もの」の見方を知った時、私の目を通して見る世界も、今までよりも新鮮な美しさや面白さに満ちあふれたものに感じられます。</p></section>';
 html=html.replace(/<section class="essay">[\s\S]*?<\/section>/,newEssay);
 html=html.replace('<p class="note">※ 表紙はレイアウト確認用の仮イメージです。</p>','');
-const newBooks='<section class="books">'
-  +'<article class="book"><div class="cover"><div class="mock m1 real-cover"><img class="book-cover-photo" src="https://media.neimanmarcus.com/f_auto%2Cq_auto%3Agood%2Car_4%3A5%2Cc_fill%2Cdpr_2.0%2Cw_540/01/nm_4854157_100000_m" alt="おすすめ書籍1の表紙"></div></div><b class="num">1</b><div class="info"></div></article>'
-  +'<article class="book"><div class="cover"><div class="mock m2 real-cover"><img class="book-cover-photo" src="https://www.extrabuch.com/media/images/popup/978-952-7222-16-4.jpg" alt="おすすめ書籍2の表紙"></div></div><b class="num">2</b><div class="info"></div></article>'
-  +'<article class="book"><div class="cover"><div class="mock m3 real-cover"><img class="book-cover-photo" src="https://prcdn.freetls.fastly.net/release_image/113046/15/113046-15-2e17fc229adb28f8036f616de2929e3c-3506x2307.jpg?auto=webp&bg-color=fff&fit=bounds&format=jpeg&height=1350&quality=85%2C65&width=1950" alt="おすすめ書籍3の表紙"></div></div><b class="num">3</b><div class="info"></div></article>'
-  +'<article class="book"><div class="cover"><div class="mock m4 real-cover"><img class="book-cover-photo" src="https://baseec-img-mng.akamaized.net/images/item/origin/ef27d832463adef28d7d568c7d32b31e.png?im=Resize%2Cwidth%3D1280%2Ctype%3Dnormal&imformat=generic&q=90" alt="おすすめ書籍4の表紙"></div></div><b class="num">4</b><div class="info"></div></article>'
-  +'</section>';
+const newBooks=`<section class="books">
+<article class="book">
+  <div class="cover"><div class="mock m1 real-cover"><img class="book-cover-photo" src="https://baseec-img-mng.akamaized.net/images/item/origin/ef27d832463adef28d7d568c7d32b31e.png?im=Resize%2Cwidth%3D1280%2Ctype%3Dnormal&imformat=generic&q=90" alt="『ガラスの器と静物画　山野アンダーソン陽子と18人の画家』の表紙"></div></div>
+  <b class="num">1</b>
+  <div class="info">
+    <span class="artist">山野アンダーソン陽子</span>
+    <h3>『ガラスの器と静物画　山野アンダーソン陽子と18人の画家』</h3>
+    <p>『ガラス～』は、ガラス作家・山野アンダーソン陽子が主導した、彼女の友人である18人の画家たちと、写真家・三部正博との共同アートプロジェクトを題材とした展覧会である（2023年、東京オペラシティアートギャラリー）。本プロジェクトで重要な役割を果たしたのが、山野が制作するガラスの器だ。山野はまず友人の画家たちから文章で「どのようなガラスの器が欲しいか」についてリクエストを受け（「お酒がたくさん入れられるコップ」という率直なものから、詩の様な余白の感じられる文章まで様々であった）、それをもとに器を制作する。出来上がった器は画家たちのアトリエに郵送され、画家たちは各々がリクエストした器を題材とした絵画を描く。次に、写真家の三部が画家のアトリエで各々のガラスの器を写真に収める。ここまでの軌跡を全てアートブックにまとめて出版をすることが、本プロジェクトの終着点であった（奇しくも「視展」発足の発端は、「アートブックを持ち寄ろう」というアイディアだった）。</p>
+    <p>実は今回ここで展示している本は、このアートブックではなく、山野がプロジェクトの全容を東京で発表した際に刊行された展覧会図録である。プロジェクトのゴールともいえるアートブックをお見せできず残念だが、こちらの図録でも、ガラスの器が文章、器そのもの、絵画、写真、と様々な表現媒体に軽やかに取り込まれていく様子を楽しむことができるので、ぜひ手に取ってページをめくってみて欲しい。私が現代アートやコンセプチュアル・アートの面白さに目覚めたきっかけでもあるので、個人的にも強い思い入れのある展覧会だ。</p>
+    <p>さて、そもそもガラスという素材は、非常に馴染み深い存在である。室内外や地域を問わず、ガラスに一切触れない日などないのではないかと疑いたくなるほど、私たちの生活はガラスで溢れている。ことガラス食器ともなれば、自宅や飲食店などで、ほぼ毎日手で口で触れている人がほとんどではないだろうか。ガラス、そしてガラスの器はそれだけ普遍的で身近な存在だ。また「ガラスの器を描いた絵」も、絵画史においては普遍的である。ガラスの器は、時には邸宅の壁に山盛りの果実やワインと共に、時には王侯貴族の豪奢な調度品として、時には透明な素材をも表現し得る画家の技量を示すために、時にはその割れてしまう性質を「人命の儚さ」と結びつけられて象徴的な意味合いを含んだモチーフとして、描かれてきた。</p>
+    <p>このようにガラスの器も、それを描いた絵画も日常的でありふれた存在だ。しかしアーティストである山野のまなざしは、それらに新しい意味を見出し、アートに変容させる。山野が着目したのは、器の制作者と絵画の制作者（器の依頼者）、さらに写真家との間に生まれる、認識や表現の「ズレ」である。山野は、そもそもこのプロジェクトを始めた動機として、画家たちが山野の器を描いた際に生まれる、「絵の中の世界と現実とのズレ」を見てみたいと思ったことをあげている。こういった「ズレ」は、「別の誰かの視点によって切り取られた世界や作り出されたものを見た際に気付く、自分と他者の感覚の相違」とも言い換えられるだろう。「ズレ」は、器が絵画にされたときに限らず、プロジェクト内で幾度も発生したはずだ。山野が文章のリクエストから想像して制作した器は依頼者の思い描いた器そのものではあり得ないし、写真家の三部が撮影した写真に写る器も、山野や画家たちが肉眼で見ていたのとは全く異なる表情をしていることだろう。そして、こういった認識や感受性の食い違いとも言い換えられる「ズレ」は、日常生活でよく起こる。山野は、ガラスの器や器を描いた絵画、そして認識の相違といった、あまりにも普遍的なものを注意深く見つめ、そこに新しい価値や面白さを見出して、唯一無二のアートプロジェクトを作り上げたのである。</p>
+    <p>このように、身の周りにあるものを何でも面白がり、不思議がり、他者の感情を揺さぶるほど鋭い表現に研ぎ澄ませていくアーティストの「視点」は特別なものだと思う。さらに彼らは、その特別な目で見出した魅力的な風景を自身の中にとどめるのではなく、言葉や身体、絵具などを使って、鑑賞者である私たちにも丁寧に鮮烈に全力で共有してくれる。アートやアーティストのそのようなひたむきさ、「自分が見つけた特別な景色を一緒に見よう」と見ず知らずの私に語り掛けてくれる優しさ、世界に対して全力で心を開く勇気に、私は心を打たれる。</p>
+  </div>
+</article>
+
+<article class="book">
+  <div class="cover"><div class="mock m2 real-cover"><img class="book-cover-photo" src="https://prcdn.freetls.fastly.net/release_image/113046/15/113046-15-2e17fc229adb28f8036f616de2929e3c-3506x2307.jpg?auto=webp&bg-color=fff&fit=bounds&format=jpeg&height=1350&quality=85%2C65&width=1950" alt="『エイドリアン・バーグ　無限の庭園』の表紙"></div></div>
+  <b class="num">2</b>
+  <div class="info">
+    <span class="artist">エイドリアン・バーグ</span>
+    <h3>『エイドリアン・バーグ　無限の庭園』</h3>
+    <p>エイドリアン・バーグ（Adrien Berg, 1929-2011）は、今年亡くなった現代アートの巨匠・デイヴィッド・ホックニーに大きな影響を与えた画家としても知られる。彼の絵画に繰り返し登場するのは、公園の風景だ。道沿いの並木や湖、森林といった、何一つ特別な所はない、ありふれたものだ。しかしバーグに見つめ続けられた普遍的なものたちは、絵画の中で徐々に姿を変えていく。デフォルメされた造形で繰り返し描かれる木々は、自然の風景というよりもリズミカルに配置された色彩そのもので、時に楽譜や心電図のようにも見える。展覧会および展覧会図録である本書では、バーグの長年の画業において、ありふれた風景がみるみる変身していくさまを見ることができる。バーグの視点を通して見る風景は、見るも楽しい形や色の反復が強調され、心地よいリズムを携えた音楽のような風情だ。</p>
+  </div>
+</article>
+
+<article class="book">
+  <div class="cover"><div class="mock m3 real-cover"><img class="book-cover-photo" src="https://www.extrabuch.com/media/images/popup/978-952-7222-16-4.jpg" alt="『KUSTAA SAKSI COSMOS』の表紙"></div></div>
+  <b class="num">3</b>
+  <div class="info">
+    <span class="artist">クスター・サクシ</span>
+    <h3>『KUSTAA SAKSI COSMOS』</h3>
+    <p>クスター・サクシは、オランダを中心に活躍する、フィンランド出身のアーティスト・デザイナーだ。彼の代表的な作品は、動植物や個人的な体験、世界各地の神話を題材とした大型のタペストリーだ。そのサイズは一般的な壁かけサイズのものから、時に天井から床まで届く巨大なものにまで及ぶ。本書に掲載されたサクシのタペストリーは室内、荒野、森の中と様々な場所で撮影され、豊かな表情を見せている。</p>
+    <p>元々タペストリーとは、伝統的な西洋の壁掛け調度品であり、機織りでおられた１枚の大きな布だ。しかしサクシにとってタペストリーは、ただの歴史のある装飾品・ただの１枚の布ではない。例えばサクシは布の規則的な編み目や、糸が絡み合って見え隠れする部分があることに大きな関心を寄せる。布には編み目がある。糸と糸が重なると見えない部分が生まれる。当たり前のことだ。その当たり前の要素が、サクシにとっては、繰り返し彼を苦しませる持病の片頭痛を表現するのに、合理主義社会で時折見え隠れする地域伝承や伝説を表現するのにこれ以上ない最高の媒体なのだ。他にもサクシの作品の中には、布の編み目に植物の種を織り込んだものや、和紙や通常織物には使われない堅い素材をタペストリーに織り込み、それをあえてほつれさせて露出させているものもある。サクシは当たり前であるがゆえに見過ごしてしまう布の性質や素材の面白さに目を光らせ、日々軽やかなアートを生み出し続けている。</p>
+  </div>
+</article>
+
+<article class="book">
+  <div class="cover"><div class="mock m4 real-cover"><img class="book-cover-photo" src="https://media.neimanmarcus.com/f_auto%2Cq_auto%3Agood%2Car_4%3A5%2Cc_fill%2Cdpr_2.0%2Cw_540/01/nm_4854157_100000_m" alt="『Paul Smith』の表紙"></div></div>
+  <b class="num">4</b>
+  <div class="info">
+    <span class="artist">Paul Smith</span>
+    <h3>『Paul Smith』</h3>
+    <p>ブランド創立50周年を記念して作られた、Paul Smithの魅力を大解剖する1冊。ポール・スミスの目は、どんなものも洒脱で見るも楽しい柄に作り変えてしまう。山盛りのスパゲッティ、緑色のリンゴ、花畑、手書きの文字やハイソな街並み、自転車レースまで！私たちが見慣れてしまったものでも、ポール・スミスはそこから美しさや面白さを手品のように次々と引っ張り出し、全く新しい意味を持つものに変身させてしまう。</p>
+    <p>全編フルカラーの本書はポール・スミスの全面的な協力のもと作られ、ページの作りや色使いもポール・スミスらしい遊び心でいっぱいだ。</p>
+  </div>
+</article>
+</section>`;
 html=html.replace(/<section class="books">[\s\S]*?<\/section>/,newBooks);
 html=html.replace('</head>','<style id="real-book-covers">.real-cover{display:flex;align-items:center;justify-content:center;background:#f7f5ef}.real-cover:before,.real-cover:after{display:none!important}.book-cover-photo{display:block;width:auto;height:auto;max-width:100%;max-height:100%;object-fit:contain}</style></head>');
 
