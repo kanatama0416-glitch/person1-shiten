@@ -37,7 +37,7 @@
     {sel:'.essay',x:.88,y:0,dy:-24,rot:'7deg'},
     {sel:'.book:nth-child(1) .cover',x:.12,y:.18,rot:'-8deg'},
     {sel:'.book:nth-child(3) .cover',x:.88,y:.18,rot:'6deg'},
-    {sel:'.book:nth-child(5) .cover',x:.12,y:.18,rot:'-5deg'},
+    {sel:'.book:nth-child(4) .cover',x:.12,y:.18,rot:'-5deg'},
     {sel:'.views',x:.88,y:0,dy:-22,rot:'8deg'}
   ];
   const chaseLines=[
