@@ -74,7 +74,7 @@ const newBooks=`<section class="books">
 </article>
 </section>`;
 html=html.replace(/<section class="books">[\s\S]*?<\/section>/,newBooks);
-html=html.replace('</head>','<style id="real-book-covers">.real-cover{display:flex;align-items:center;justify-content:center;background:#f7f5ef}.real-cover:before,.real-cover:after{display:none!important}.book-cover-photo{display:block;width:auto;height:auto;max-width:100%;max-height:100%;object-fit:contain}</style></head>');
+html=html.replace('</head>','<style id="real-book-covers">.real-cover{display:flex;align-items:center;justify-content:center;background:#f7f5ef}.real-cover:before,.real-cover:after{display:none!important}.book-cover-photo{display:block;width:auto;height:auto;max-width:100%;max-height:100%;object-fit:contain}.info p+p{margin-top:1em}</style></head>');
 
 const oldOnsen2='横尾忠則が訪れた温泉地での出来事と、そこから生まれた絵を一緒に見ることができます。個人的な記憶や経験が、どのように作品へとつながっていくのか。その人が見たものと、描いたものの間をたどることができる一冊です。';
 const newOnsen='横尾忠則の作品には、目にした景色や体験、感じたこと、空想したことが重なり合っている。なぜこの絵になったのだろう、と不思議に思うことも多い。『温泉主義』では、温泉を旅した紀行文と、その土地をモチーフにした作品が並び、作品の背景をたどることができる。不思議だった絵に、彼の記憶や感情の重なりが見えてくる。同じ絵なのに、読み取れるものが増えていく。行き先には有名な温泉地も多く、この本を読んだあとに実際にその土地を訪ねれば、彼の内側に広がっていた世界と、目の前の風景とが重なり合い、作品をより深く感じられるのではないかと思う。';
